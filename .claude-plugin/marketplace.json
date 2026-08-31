@@ -4,5 +4,16 @@
     "name": "Cristian Giehl",
     "email": "cristian.giehl@gmail.com"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "structured-prompt-engineering",
+      "displayName": "Structured Prompt Engineering",
+      "description": "Padrão para escrever getSystemPrompt/getUserPromptTemplate como objetos JSON.stringify — estrutura, parametrização e do's/don'ts",
+      "version": "1.0.0",
+      "author": "Cristian Giehl",
+      "license": "MIT",
+      "source": "./plugins/structured-prompt-engineering",
+      "keywords": ["llm", "prompt-engineering", "system-prompt", "few-shot"]
+    }
+  ]
 }
