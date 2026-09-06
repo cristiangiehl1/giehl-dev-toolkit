@@ -17,12 +17,17 @@ node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json'
 # validar scripts de skill
 node --check plugins/<nome>/scripts/<arquivo>.mjs
 
-# instalar/testar localmente
-claude plugin marketplace add .
+# instalar/testar localmente (o CLI rejeita `.` e caminhos relativos — use o absoluto)
+claude plugin marketplace add /caminho/absoluto/para/giehl-dev-toolkit
 claude plugin marketplace list
+
+# recarregar o catálogo depois de editar o marketplace.json
+claude plugin marketplace update giehl-dev-toolkit
 ```
 
 Dentro do Claude Code: `/plugin install <nome>@giehl-dev-toolkit`.
+
+Instalado por diretório, edições no `SKILL.md` valem na hora; mudanças no `marketplace.json` só depois do `marketplace update`.
 
 Para publicar uma versão: `git tag vX.Y.Z && git push origin vX.Y.Z` (SemVer).
 
@@ -36,6 +41,19 @@ Há **duas fontes de verdade que precisam ficar em sincronia**, e é o erro mais
 | `plugins/<nome>/SKILL.md` | frontmatter (`name`, `description`) + implementação |
 
 Uma skill criada em `plugins/` mas **não registrada no `marketplace.json` é invisível** — nada falha, ela simplesmente não existe para o instalador. O campo `name` precisa ser idêntico nos dois lugares, e `source` aponta para `./plugins/<nome>`.
+
+#### O schema da entrada, não só o JSON
+
+`JSON.parse` passando não garante nada: o Claude Code valida cada entrada contra um schema **na hora do install**, e a falha aparece só ali, como `This plugin's marketplace entry is invalid: ...`. `marketplace add` e `marketplace list` continuam funcionando normalmente com uma entrada quebrada.
+
+A armadilha já vista na prática: `author` **precisa ser objeto**, nunca string.
+
+```jsonc
+"author": { "name": "Cristian Giehl", "email": "cristian.giehl@gmail.com" }  // ✅
+"author": "Cristian Giehl"                                                   // ❌ expected object, received string
+```
+
+Ao adicionar um plugin, copie uma entrada existente inteira e troque os valores, em vez de escrever os campos de memória — e valide instalando de verdade, não só com `JSON.parse`.
 
 ### Anatomia de uma skill
 

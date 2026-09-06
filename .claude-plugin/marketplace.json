@@ -23,7 +23,10 @@
       "displayName": "Biome Lint Setup",
       "description": "Setup de lint/format com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + tailwindcss, com .editorconfig e .nvmrc — Next.js, Vite, e backend Node (Hono, Fastify, Express, NestJS)",
       "version": "1.0.0",
-      "author": "Cristian Giehl",
+      "author": {
+        "name": "Cristian Giehl",
+        "email": "cristian.giehl@gmail.com"
+      },
       "license": "MIT",
       "source": "./plugins/biome-lint-setup",
       "keywords": ["biome", "lint", "prettier", "eslint", "formatter", "editorconfig"]
