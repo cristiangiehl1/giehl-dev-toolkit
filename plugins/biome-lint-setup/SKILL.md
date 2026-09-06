@@ -41,7 +41,7 @@ npx biome check --write .   # formata + organiza imports em todo o projeto
 npx biome check .           # precisa sair limpo
 ```
 
-A primeira passada num projeto legado quase sempre acusa erros novos: o preset `recommended` do Biome inclui regras de a11y e correção que o `eslint-config-next` não ligava (`useButtonType`, `noUnusedFunctionParameters`, `useExhaustiveDependencies`). **Isso é sinal, não ruído** — triar caso a caso é mais valioso do que desligar em massa. Só desligue uma regra depois de olhar o que ela apontou; se desligar, deixe o motivo num comentário no `biome.json`.
+A primeira passada num projeto legado quase sempre acusa erros novos: o preset `recommended` do Biome inclui regras de a11y e correção que o `eslint-config-next` não ligava (`useButtonType`, `noUnusedFunctionParameters`, `useExhaustiveDependencies`). **Isso é sinal, não ruído** — triar caso a caso é mais valioso do que desligar em massa. Só desligue uma regra depois de olhar o que ela apontou; se desligar, deixe o motivo registrado — mas veja a armadilha 6 antes de escrever comentário em `biome.json`.
 
 Faça o commit da reformatação em massa **separado** das mudanças de config, senão qualquer review futuro fica ilegível.
 
@@ -92,6 +92,10 @@ Estas são as que fazem o setup falhar de forma confusa:
 4. **Config aninhada exige `"root": false`.** Dois `biome.json` sem isso resulta em `Found a nested root configuration` e nada roda. É o caso de monorepo (Next + API Node separada) — use `--nested` nos pacotes.
 
 5. **`useSortedClasses` não ordena com `check --write` no default.** O fix dele é *unsafe*, então fica só como aviso. O script define `fix: "safe"` na regra, que é o que reproduz o comportamento do `prettier-plugin-tailwindcss`. Sem isso, as classes do Tailwind param de ser ordenadas e ninguém percebe por semanas.
+
+6. **Comentário em `biome.json` faz o Biome descartar o arquivo inteiro — em silêncio.** Não há erro de parse nem aviso: ele simplesmente cai no default (que formata com **tab**), e o `biome check` passa a acusar o projeto todo. Um `//` colado para justificar uma regra desligada custou 50 erros até a causa aparecer. Comentário só em `biome.jsonc`; em `biome.json`, registre o motivo fora do arquivo.
+
+7. **`biome check` reprova `!**/dist/**` como ignore de pasta.** A regra `useBiomeIgnoreFolder` quer o nome nu (`!**/dist`). Vale para o `files.includes` que você escrever à mão — o script já gera na forma certa.
 
 ## Referências
 

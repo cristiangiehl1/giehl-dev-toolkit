@@ -17,9 +17,11 @@ Separar 1 de 3 é o que permite revisar a migração: no commit de config dá pa
 
 Arquivos: `.eslintrc*`, `eslint.config.*`, `.eslintignore`, `.prettierrc*`, `prettier.config.*`, `.prettierignore`.
 
-Dependências: `eslint`, `eslint-config-next`, `eslint-config-prettier`, `eslint-plugin-prettier`, `eslint-plugin-simple-import-sort`, `eslint-plugin-import`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `eslint-plugin-unused-imports`, `@typescript-eslint/*`, `typescript-eslint`, `prettier`, `prettier-plugin-tailwindcss`.
+Dependências: `@eslint/js`, `@eslint/eslintrc`, `eslint`, `eslint-config-next`, `eslint-config-prettier`, `eslint-plugin-prettier`, `eslint-plugin-simple-import-sort`, `eslint-plugin-import`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, `eslint-plugin-jsx-a11y`, `eslint-plugin-unused-imports`, `@typescript-eslint/*`, `typescript-eslint`, `prettier`, `prettier-plugin-tailwindcss`.
 
 Ele reescreve o `package.json` mas **não roda o install** da remoção — rode `<pm> install` depois para o lockfile acompanhar.
+
+As **regras que o ESLint desligava** não são traduzidas: um flat config é código, não dados. O script lê os `'off'` do arquivo antes de apagá-lo e lista no final — cabe a você decidir o equivalente no Biome. O caso mais comum, `no-explicit-any` em `**/*.d.ts`, já vem no `biome.json` gerado.
 
 Se o projeto tiver plugin ESLint sem equivalente no Biome (ex.: regras internas da empresa, `eslint-plugin-boundaries`), o script não sabe disso: ou você mantém ESLint só para essas regras (rodando junto do Biome, o que é suportado mas dobra o tempo de CI), ou aceita perdê-las. Decida explicitamente em vez de descobrir depois.
 
@@ -29,9 +31,10 @@ O script troca os `lint:prettier:*` / `lint:eslint:*` por:
 
 ```jsonc
 {
-  "lint": "biome check .",           // lint + format + imports, só reporta
+  "lint": "biome check .",             // lint + format + imports, só reporta
   "lint:fix": "biome check --write .", // aplica tudo que é seguro
   "format": "biome format --write .",  // só formatação
+  "format:check": "biome format .",    // verifica formatação sem escrever
   "lint:ci": "biome ci ."              // modo CI: não escreve, falha no primeiro problema
 }
 ```
@@ -55,7 +58,7 @@ Por que `*` em vez de `*.{js,ts,tsx}`: o Biome também trata JSON e CSS, e decid
 
 O script **não** instala nem edita husky, GitHub Actions ou qualquer pipeline — essas peças têm dono próprio e mudam por motivos diferentes dos de estilo de código. Um `.husky/pre-commit` que chama `lint-staged` continua funcionando sem alteração, porque quem mudou foi a config do lint-staged, não o hook.
 
-O que o script faz é **avisar**: ao remover ESLint e Prettier, ele varre `.husky/*` e `.github/workflows/*` e lista o que ficou apontando para binário que não existe mais. Nada é alterado nesses arquivos.
+O que o script faz é **avisar**: ao remover ESLint e Prettier, ele varre `.husky/*`, `.github/workflows/*` e a documentação da raiz (`README.md`, `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`) e lista o que ficou apontando para ferramenta que não existe mais. Nada é alterado nesses arquivos — a tabela de scripts do README costuma ser o que sobra desatualizado.
 
 Se você decidir atualizar o CI, `biome ci` é a variante para pipeline — não escreve e emite anotações no formato do GitHub Actions, então os erros aparecem inline no diff da PR. Mas a decisão e a edição são suas.
 

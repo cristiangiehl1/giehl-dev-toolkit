@@ -39,11 +39,24 @@ const LINE_WIDTH = Number(flag('line-width', 80))
 const log = (...a) => console.log(...a)
 const changes = []
 
+// Num JSON o que conta é a estrutura, não o texto: os arquivos que geramos saem
+// do JSON.stringify e logo depois passam pelo formatador do Biome, que colapsa
+// array curto numa linha. Comparar string a string faria toda reexecução do
+// script "reescrever" arquivo idêntico — adeus idempotência.
+function sameJson(rel, prev, content) {
+  if (prev === null || !rel.endsWith('.json')) return false
+  try {
+    return JSON.stringify(JSON.parse(prev)) === JSON.stringify(JSON.parse(content))
+  } catch {
+    return false
+  }
+}
+
 function write(rel, content) {
   const abs = path.join(DIR, rel)
   const exists = fs.existsSync(abs)
   const prev = exists ? fs.readFileSync(abs, 'utf8') : null
-  if (prev === content) {
+  if (prev === content || sameJson(rel, prev, content)) {
     log(`  = ${rel} (já correto)`)
     return
   }
@@ -141,14 +154,17 @@ function currentBiomeVersion() {
 // ---------------------------------------------------------------- biome.json
 
 function ignoresFor(stack) {
+  // Pasta se ignora pelo nome nu (`!**/dist`), nao por `!**/dist/**` — a regra
+  // useBiomeIgnoreFolder do proprio Biome reprova a segunda forma, e o config
+  // gerado precisa passar no `biome check` que este script manda rodar.
   const base = [
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/build/**',
-    '!**/coverage/**',
+    '!**/node_modules',
+    '!**/dist',
+    '!**/build',
+    '!**/coverage',
     '!**/*.min.js',
   ]
-  if (stack === 'next') base.push('!**/.next/**', '!**/out/**', '!**/next-env.d.ts')
+  if (stack === 'next') base.push('!**/.next', '!**/out', '!**/next-env.d.ts')
   if (stack === 'node') base.push('!**/*.generated.ts')
   return base
 }
@@ -258,6 +274,13 @@ function buildConfig(version) {
       includes: ['**/*.config.{js,ts,mjs,cjs}', '**/*.d.ts'],
       linter: { rules: { correctness: { noUndeclaredDependencies: 'off' } } },
     },
+    // Declaracao ambiente de pacote de terceiros usa `any` de proposito: nao ha
+    // contrato nosso a preservar ali. E o mesmo override que o eslint.config.mjs
+    // do padrao Giehl ja trazia para **/*.d.ts.
+    {
+      includes: ['**/*.d.ts'],
+      linter: { rules: { suspicious: { noExplicitAny: 'off' } } },
+    },
   ]
 
   return cfg
@@ -319,6 +342,7 @@ const LEGACY_FILES = [
 ]
 
 const LEGACY_DEPS = [
+  '@eslint/js', '@eslint/eslintrc',
   'eslint', 'eslint-config-next', 'eslint-config-prettier', 'eslint-plugin-prettier',
   'eslint-plugin-simple-import-sort', 'eslint-plugin-import', 'eslint-plugin-react',
   'eslint-plugin-react-hooks', 'eslint-plugin-jsx-a11y', 'eslint-plugin-unused-imports',
@@ -350,7 +374,10 @@ if (!NESTED) {
 }
 
 // scripts
-const nextPkg = JSON.parse(JSON.stringify(pkg))
+// Reler do disco, e NAO reaproveitar o `pkg` lido no inicio: o installBiome()
+// acima acabou de gravar @biomejs/biome nas devDependencies. Partir da copia
+// antiga apaga essa entrada — o setup termina "com sucesso" e sem o Biome.
+const nextPkg = DRY ? JSON.parse(JSON.stringify(pkg)) : JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
 nextPkg.scripts = nextPkg.scripts ?? {}
 for (const k of Object.keys(nextPkg.scripts)) {
   if (/^lint:(prettier|eslint)/.test(k)) delete nextPkg.scripts[k]
@@ -359,6 +386,7 @@ Object.assign(nextPkg.scripts, {
   lint: 'biome check .',
   'lint:fix': 'biome check --write .',
   format: 'biome format --write .',
+  'format:check': 'biome format .',
   'lint:ci': 'biome ci .',
 })
 
@@ -370,7 +398,20 @@ if (!has('no-remove-legacy')) {
 }
 write('package.json', json(nextPkg))
 
+// Um config de ESLint é código, não dados: não dá para traduzir os overrides do
+// projeto com segurança. O que dá — e evita perder regra em silêncio — é listar
+// as que estavam explicitamente desligadas antes de apagar o arquivo.
+const disabledBefore = []
 if (!has('no-remove-legacy')) {
+  for (const f of LEGACY_FILES.filter((n) => n.includes('eslint'))) {
+    const abs = path.join(DIR, f)
+    if (!fs.existsSync(abs)) continue
+    const src = fs.readFileSync(abs, 'utf8')
+    for (const [, rule] of src.matchAll(/['"]([\w@/-]+)['"]\s*:\s*['"]off['"]/g)) {
+      if (!disabledBefore.includes(rule)) disabledBefore.push(rule)
+    }
+  }
+
   log('\n▸ removendo configs legadas')
   for (const f of LEGACY_FILES) remove(f)
 }
@@ -385,6 +426,35 @@ if (fs.existsSync(path.join(DIR, '.lintstagedrc.json')) || pkg['lint-staged']) {
   write('.lintstagedrc.json', json({ '*': ['biome check --write --no-errors-on-unmatched'] }))
 }
 
+// Os JSON acima saem do JSON.stringify, que quebra todo array em várias linhas;
+// o formatador do Biome colapsa array curto numa linha só. Sem esta passada, o
+// `biome check` que este próprio script manda rodar em seguida acusa os arquivos
+// que ele acabou de gerar. Deixar o Biome formatar é mais confiável que imitar
+// as regras dele aqui — e acompanha mudança de versão de graça.
+if (!DRY) {
+  const bin = path.join(DIR, 'node_modules/.bin/biome')
+  const generated = [
+    'biome.json',
+    '.vscode/settings.json',
+    '.vscode/extensions.json',
+    '.lintstagedrc.json',
+    'package.json',
+  ].filter((f) => changes.includes(f) && fs.existsSync(path.join(DIR, f)))
+
+  if (generated.length && fs.existsSync(bin)) {
+    try {
+      execSync(`${JSON.stringify(bin)} format --write ${generated.join(' ')}`, {
+        cwd: DIR,
+        stdio: 'ignore',
+      })
+    } catch {
+      // Formatar o que geramos é acabamento, não pré-requisito: se falhar, o
+      // setup continua válido e o `biome check --write` do usuário resolve.
+      log('  · não consegui formatar os arquivos gerados (rode `biome check --write .`)')
+    }
+  }
+}
+
 // husky e CI ficam FORA do escopo: não instalamos nem editamos. Mas se algum
 // deles chama o eslint/prettier que acabamos de remover, quebra no próximo
 // commit — avisar é obrigação, configurar não é.
@@ -396,6 +466,15 @@ if (fs.existsSync(huskyDir)) {
     if (!fs.statSync(hookPath).isFile()) continue
     if (/eslint|prettier/.test(fs.readFileSync(hookPath, 'utf8'))) stale.push(`.husky/${hook}`)
   }
+}
+
+// README/CLAUDE.md costumam listar os scripts do package.json numa tabela. Não
+// quebram nada, mas passam a mentir sobre como se roda o lint — e é o tipo de
+// documentação que ninguém revisita até enganar alguém.
+for (const doc of ['README.md', 'README.en-US.md', 'CLAUDE.md', 'AGENTS.md', 'CONTRIBUTING.md']) {
+  const p = path.join(DIR, doc)
+  if (!fs.existsSync(p)) continue
+  if (/eslint|prettier/i.test(fs.readFileSync(p, 'utf8'))) stale.push(doc)
 }
 
 const ciDir = path.join(DIR, '.github/workflows')
@@ -415,6 +494,12 @@ if (stale.length) {
   log('\n⚠ Fora do escopo deste setup, mas passaram a apontar para ferramenta removida:')
   for (const s of stale) log(`    ${s}`)
   log('  Trocar por `biome check` (ou `biome ci`) é decisão sua — nada foi alterado aí.')
+}
+
+if (disabledBefore.length) {
+  log('\n⚠ O ESLint removido desligava estas regras — confira se o equivalente no')
+  log('  Biome precisa do mesmo tratamento (o script só traduz as do padrão Giehl):')
+  for (const r of disabledBefore) log(`    ${r}`)
 }
 
 log('\nPróximos passos:')
