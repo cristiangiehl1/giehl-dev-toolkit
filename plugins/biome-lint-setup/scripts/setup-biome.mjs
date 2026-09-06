@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * setup-biome.mjs — aplica o padrão de lint/format Biome (Giehl) num projeto.
+ * setup-biome.mjs — applies the Biome lint/format standard (Giehl) to a project.
  *
- * Uso:
+ * Usage:
  *   node setup-biome.mjs [--dir .] [--stack auto] [--framework auto] [--pm auto]
  *                        [--line-width 80] [--node-version vX.Y.Z]
  *                        [--nested] [--no-install] [--no-remove-legacy] [--dry-run]
  *
- * --stack      auto | next | vite | node | react   (auto = detecta pelas deps)
- * --framework  auto | nest | express | fastify | hono | none  (só importa p/ stack=node)
- * --nested     gera "root": false — use em pacotes de dentro de um monorepo
- * --dry-run    mostra o que faria, sem escrever nada
+ * --stack      auto | next | vite | node | react   (auto = detected from the deps)
+ * --framework  auto | nest | express | fastify | hono | none  (only matters for stack=node)
+ * --nested     emits "root": false — use it in packages inside a monorepo
+ * --dry-run    shows what it would do, without writing anything
  *
- * Nunca fixa versão do Biome: instala sempre @biomejs/biome@latest e usa a
- * versão resultante no $schema.
+ * Never pins the Biome version: always installs @biomejs/biome@latest and uses
+ * the resulting version in $schema.
  */
 
 import { execSync } from 'node:child_process'
@@ -39,10 +39,10 @@ const LINE_WIDTH = Number(flag('line-width', 80))
 const log = (...a) => console.log(...a)
 const changes = []
 
-// Num JSON o que conta é a estrutura, não o texto: os arquivos que geramos saem
-// do JSON.stringify e logo depois passam pelo formatador do Biome, que colapsa
-// array curto numa linha. Comparar string a string faria toda reexecução do
-// script "reescrever" arquivo idêntico — adeus idempotência.
+// In JSON what counts is the structure, not the text: the files we generate come
+// out of JSON.stringify and right afterwards go through Biome's formatter, which
+// collapses a short array onto one line. Comparing string to string would make
+// every rerun of the script "rewrite" an identical file — goodbye idempotence.
 function sameJson(rel, prev, content) {
   if (prev === null || !rel.endsWith('.json')) return false
   try {
@@ -57,7 +57,7 @@ function write(rel, content) {
   const exists = fs.existsSync(abs)
   const prev = exists ? fs.readFileSync(abs, 'utf8') : null
   if (prev === content || sameJson(rel, prev, content)) {
-    log(`  = ${rel} (já correto)`)
+    log(`  = ${rel} (already correct)`)
     return
   }
   changes.push(rel)
@@ -78,11 +78,11 @@ function remove(rel) {
 
 const json = (obj) => `${JSON.stringify(obj, null, 2)}\n`
 
-// ---------------------------------------------------------------- contexto
+// ---------------------------------------------------------------- context
 
 const pkgPath = path.join(DIR, 'package.json')
 if (!fs.existsSync(pkgPath)) {
-  console.error(`✗ package.json não encontrado em ${DIR}`)
+  console.error(`✗ package.json not found in ${DIR}`)
   process.exit(1)
 }
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
@@ -135,7 +135,7 @@ function installBiome() {
     bun: 'bun add -d @biomejs/biome@latest',
     npm: 'npm i -D @biomejs/biome@latest',
   }[PM]
-  log(`\n▸ instalando Biome (${PM})`)
+  log(`\n▸ installing Biome (${PM})`)
   log(`  $ ${cmd}`)
   if (!DRY) execSync(cmd, { cwd: DIR, stdio: 'inherit' })
   return currentBiomeVersion() ?? 'latest'
@@ -154,9 +154,9 @@ function currentBiomeVersion() {
 // ---------------------------------------------------------------- biome.json
 
 function ignoresFor(stack) {
-  // Pasta se ignora pelo nome nu (`!**/dist`), nao por `!**/dist/**` — a regra
-  // useBiomeIgnoreFolder do proprio Biome reprova a segunda forma, e o config
-  // gerado precisa passar no `biome check` que este script manda rodar.
+  // A folder is ignored by its bare name (`!**/dist`), not by `!**/dist/**` —
+  // Biome's own useBiomeIgnoreFolder rule rejects the second form, and the config
+  // we generate has to pass the `biome check` this script tells you to run.
   const base = [
     '!**/node_modules',
     '!**/dist',
@@ -186,7 +186,7 @@ function buildConfig(version) {
     lineEnding: 'lf',
   }
 
-  // Tradução 1:1 do prettier.config.mjs do padrão Giehl.
+  // 1:1 translation of the Giehl standard's prettier.config.mjs.
   cfg.javascript = {
     formatter: {
       quoteStyle: 'single',        // singleQuote: true
@@ -200,16 +200,16 @@ function buildConfig(version) {
     },
   }
   if (FRAMEWORK === 'nest') {
-    // Sem isto o parser do Biome REJEITA @Inject()/@InjectRepository() em
-    // parâmetros de constructor — os arquivos nem chegam a ser analisados.
+    // Without this Biome's parser REJECTS @Inject()/@InjectRepository() on
+    // constructor parameters — the files are never even analyzed.
     cfg.javascript.parser = { unsafeParameterDecoratorsEnabled: true }
   }
 
   cfg.json = { formatter: { enabled: true, indentWidth: 2 } }
   if (IS_FRONT) cfg.css = { formatter: { enabled: true }, linter: { enabled: true } }
 
-  // organizeImports substituindo eslint-plugin-simple-import-sort:
-  // builtins → externos → alias (@/) → relativos → estilos, separados por linha em branco.
+  // organizeImports replacing eslint-plugin-simple-import-sort:
+  // builtins → externals → alias (@/) → relative → styles, separated by a blank line.
   cfg.assist = {
     enabled: true,
     actions: {
@@ -248,8 +248,8 @@ function buildConfig(version) {
     cfg.linter.rules.nursery = {
       useSortedClasses: {
         level: 'warn',
-        // fix "safe" faz `biome check --write` ordenar as classes sozinho,
-        // reproduzindo o prettier-plugin-tailwindcss (default é unsafe = não aplica).
+        // fix "safe" makes `biome check --write` sort the classes on its own,
+        // reproducing prettier-plugin-tailwindcss (the default is unsafe = not applied).
         fix: 'safe',
         options: { functions: ['cn', 'clsx', 'cva', 'tw', 'twMerge', 'twJoin'] },
       },
@@ -257,26 +257,26 @@ function buildConfig(version) {
   }
 
   if (FRAMEWORK === 'nest') {
-    // useImportType converteria imports usados em DI para `import type`, apagando
-    // os metadados que o reflect-metadata precisa em runtime → DI quebra.
+    // useImportType would convert imports used by DI into `import type`, erasing
+    // the metadata reflect-metadata needs at runtime → DI breaks.
     cfg.linter.rules.style = { useImportType: 'off' }
-    // Parameter properties (`private readonly repo: Repo`) são lidas como parâmetros
-    // não usados. Aqui desligar é a saída certa: o nome vira `this.repo`, então a
-    // convenção `_param` (que resolve Express/Fastify) não é aplicável.
+    // Parameter properties (`private readonly repo: Repo`) are read as unused
+    // parameters. Here disabling is the right way out: the name becomes `this.repo`,
+    // so the `_param` convention (which solves Express/Fastify) does not apply.
     cfg.linter.rules.correctness = { noUnusedFunctionParameters: 'off' }
   }
-  // Express e Fastify NÃO precisam desligar noUnusedFunctionParameters: o error
-  // middleware de aridade 4 e o `opts` de plugin passam limpo prefixando com `_`
-  // (`_req`, `_next`, `_opts`). Ver references/stacks.md.
+  // Express and Fastify do NOT need noUnusedFunctionParameters off: the arity-4
+  // error middleware and the plugin `opts` pass clean by prefixing with `_`
+  // (`_req`, `_next`, `_opts`). See references/stacks.md.
 
   cfg.overrides = [
     {
       includes: ['**/*.config.{js,ts,mjs,cjs}', '**/*.d.ts'],
       linter: { rules: { correctness: { noUndeclaredDependencies: 'off' } } },
     },
-    // Declaracao ambiente de pacote de terceiros usa `any` de proposito: nao ha
-    // contrato nosso a preservar ali. E o mesmo override que o eslint.config.mjs
-    // do padrao Giehl ja trazia para **/*.d.ts.
+    // A third-party package's ambient declaration uses `any` on purpose: there is
+    // no contract of ours to preserve there. It is the same override the Giehl
+    // standard's eslint.config.mjs already carried for **/*.d.ts.
     {
       includes: ['**/*.d.ts'],
       linter: { rules: { suspicious: { noExplicitAny: 'off' } } },
@@ -286,7 +286,7 @@ function buildConfig(version) {
   return cfg
 }
 
-// ---------------------------------------------------------------- outros arquivos
+// ---------------------------------------------------------------- other files
 
 const EDITORCONFIG = `root = true
 
@@ -352,31 +352,31 @@ const LEGACY_DEPS = [
 
 // ---------------------------------------------------------------- run
 
-log(`▸ projeto  : ${DIR}`)
-log(`▸ stack    : ${STACK}${FRAMEWORK !== 'none' ? ` (${FRAMEWORK})` : ''}`)
-log(`▸ gerenciador: ${PM}${HAS_TAILWIND ? ' · tailwind' : ''}${NESTED ? ' · nested' : ''}`)
-if (DRY) log('▸ modo     : DRY RUN (nada será escrito)\n')
+log(`▸ project    : ${DIR}`)
+log(`▸ stack      : ${STACK}${FRAMEWORK !== 'none' ? ` (${FRAMEWORK})` : ''}`)
+log(`▸ pkg manager: ${PM}${HAS_TAILWIND ? ' · tailwind' : ''}${NESTED ? ' · nested' : ''}`)
+if (DRY) log('▸ mode       : DRY RUN (nothing will be written)\n')
 
 const version = installBiome()
 
-log('\n▸ escrevendo arquivos')
+log('\n▸ writing files')
 write('biome.json', json(buildConfig(version)))
-// .editorconfig/.nvmrc/.vscode descrevem o repositório inteiro. Num pacote de
-// monorepo eles pertencem à raiz — duplicá-los aqui cria fontes concorrentes
-// de verdade (um `root = true` aninhado corta a herança do .editorconfig de cima).
+// .editorconfig/.nvmrc/.vscode describe the whole repository. In a monorepo
+// package they belong at the root — duplicating them here creates competing
+// sources of truth (a nested `root = true` cuts off the .editorconfig above).
 if (!NESTED) {
   write('.editorconfig', EDITORCONFIG)
   write('.nvmrc', nvmrcContent())
   write('.vscode/settings.json', json(VSCODE_SETTINGS))
   write('.vscode/extensions.json', json({ recommendations: ['biomejs.biome'] }))
 } else {
-  log('  · .editorconfig/.nvmrc/.vscode pulados (--nested: rode na raiz do monorepo)')
+  log('  · .editorconfig/.nvmrc/.vscode skipped (--nested: run it at the monorepo root)')
 }
 
 // scripts
-// Reler do disco, e NAO reaproveitar o `pkg` lido no inicio: o installBiome()
-// acima acabou de gravar @biomejs/biome nas devDependencies. Partir da copia
-// antiga apaga essa entrada — o setup termina "com sucesso" e sem o Biome.
+// Reread from disk, do NOT reuse the `pkg` read at the start: installBiome()
+// above has just written @biomejs/biome into devDependencies. Starting from the
+// stale copy erases that entry — the setup finishes "successfully" without Biome.
 const nextPkg = DRY ? JSON.parse(JSON.stringify(pkg)) : JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
 nextPkg.scripts = nextPkg.scripts ?? {}
 for (const k of Object.keys(nextPkg.scripts)) {
@@ -398,9 +398,9 @@ if (!has('no-remove-legacy')) {
 }
 write('package.json', json(nextPkg))
 
-// Um config de ESLint é código, não dados: não dá para traduzir os overrides do
-// projeto com segurança. O que dá — e evita perder regra em silêncio — é listar
-// as que estavam explicitamente desligadas antes de apagar o arquivo.
+// An ESLint config is code, not data: there is no safe way to translate the
+// project's overrides. What is doable — and avoids silently losing a rule — is
+// listing the ones explicitly turned off before deleting the file.
 const disabledBefore = []
 if (!has('no-remove-legacy')) {
   for (const f of LEGACY_FILES.filter((n) => n.includes('eslint'))) {
@@ -412,25 +412,25 @@ if (!has('no-remove-legacy')) {
     }
   }
 
-  log('\n▸ removendo configs legadas')
+  log('\n▸ removing legacy configs')
   for (const f of LEGACY_FILES) remove(f)
 }
 
-// lint-staged faz parte do setup, mas só quando o projeto já o usa — este script
-// não adiciona a dependência, apenas reaponta a config para o Biome.
+// lint-staged is part of the setup, but only when the project already uses it —
+// this script does not add the dependency, it only repoints the config to Biome.
 if (fs.existsSync(path.join(DIR, '.lintstagedrc.json')) || pkg['lint-staged']) {
   log('\n▸ lint-staged')
-  // `*` (e não `*.{ts,tsx}`) porque o Biome também cuida de JSON/CSS e decide
-  // sozinho o que sabe processar; --no-errors-on-unmatched evita que o hook
-  // falhe num commit que só tem arquivo ignorado (.md, .png).
+  // `*` (not `*.{ts,tsx}`) because Biome also handles JSON/CSS and decides on its
+  // own what it knows how to process; --no-errors-on-unmatched keeps the hook from
+  // failing on a commit that only has ignored files (.md, .png).
   write('.lintstagedrc.json', json({ '*': ['biome check --write --no-errors-on-unmatched'] }))
 }
 
-// Os JSON acima saem do JSON.stringify, que quebra todo array em várias linhas;
-// o formatador do Biome colapsa array curto numa linha só. Sem esta passada, o
-// `biome check` que este próprio script manda rodar em seguida acusa os arquivos
-// que ele acabou de gerar. Deixar o Biome formatar é mais confiável que imitar
-// as regras dele aqui — e acompanha mudança de versão de graça.
+// The JSON above comes out of JSON.stringify, which breaks every array across
+// several lines; Biome's formatter collapses a short array onto a single line.
+// Without this pass, the `biome check` this very script tells you to run next
+// flags the files it just generated. Letting Biome format is more reliable than
+// imitating its rules here — and follows version changes for free.
 if (!DRY) {
   const bin = path.join(DIR, 'node_modules/.bin/biome')
   const generated = [
@@ -448,16 +448,16 @@ if (!DRY) {
         stdio: 'ignore',
       })
     } catch {
-      // Formatar o que geramos é acabamento, não pré-requisito: se falhar, o
-      // setup continua válido e o `biome check --write` do usuário resolve.
-      log('  · não consegui formatar os arquivos gerados (rode `biome check --write .`)')
+      // Formatting what we generated is polish, not a prerequisite: if it fails,
+      // the setup is still valid and the user's `biome check --write` fixes it.
+      log('  · could not format the generated files (run `biome check --write .`)')
     }
   }
 }
 
-// husky e CI ficam FORA do escopo: não instalamos nem editamos. Mas se algum
-// deles chama o eslint/prettier que acabamos de remover, quebra no próximo
-// commit — avisar é obrigação, configurar não é.
+// husky and CI are OUT of scope: we neither install nor edit them. But if one of
+// them calls the eslint/prettier we just removed, it breaks on the next commit —
+// warning is mandatory, configuring is not.
 const stale = []
 const huskyDir = path.join(DIR, '.husky')
 if (fs.existsSync(huskyDir)) {
@@ -468,9 +468,9 @@ if (fs.existsSync(huskyDir)) {
   }
 }
 
-// README/CLAUDE.md costumam listar os scripts do package.json numa tabela. Não
-// quebram nada, mas passam a mentir sobre como se roda o lint — e é o tipo de
-// documentação que ninguém revisita até enganar alguém.
+// README/CLAUDE.md usually list the package.json scripts in a table. They break
+// nothing, but they start lying about how lint is run — and it is the kind of
+// documentation nobody revisits until it misleads someone.
 for (const doc of ['README.md', 'README.en-US.md', 'CLAUDE.md', 'AGENTS.md', 'CONTRIBUTING.md']) {
   const p = path.join(DIR, doc)
   if (!fs.existsSync(p)) continue
@@ -488,24 +488,24 @@ if (fs.existsSync(ciDir)) {
   }
 }
 
-log(`\n✓ ${changes.length} alteração(ões). Biome ${version}.`)
+log(`\n✓ ${changes.length} change(s). Biome ${version}.`)
 
 if (stale.length) {
-  log('\n⚠ Fora do escopo deste setup, mas passaram a apontar para ferramenta removida:')
+  log('\n⚠ Out of scope for this setup, but now pointing at a removed tool:')
   for (const s of stale) log(`    ${s}`)
-  log('  Trocar por `biome check` (ou `biome ci`) é decisão sua — nada foi alterado aí.')
+  log('  Switching to `biome check` (or `biome ci`) is your call — nothing was changed there.')
 }
 
 if (disabledBefore.length) {
-  log('\n⚠ O ESLint removido desligava estas regras — confira se o equivalente no')
-  log('  Biome precisa do mesmo tratamento (o script só traduz as do padrão Giehl):')
+  log('\n⚠ The removed ESLint had these rules turned off — check whether the Biome')
+  log('  equivalent needs the same treatment (the script only translates the Giehl ones):')
   for (const r of disabledBefore) log(`    ${r}`)
 }
 
-log('\nPróximos passos:')
+log('\nNext steps:')
 log(`  ${PM} install`)
-log('  npx biome check --write .    # aplica formatação + imports em todo o projeto')
-log('  npx biome check .            # deve sair limpo')
+log('  npx biome check --write .    # applies formatting + imports across the project')
+log('  npx biome check .            # must come out clean')
 if (!DRY && changes.length) {
-  log('\nRevise o diff antes de commitar: git diff --stat')
+  log('\nReview the diff before committing: git diff --stat')
 }

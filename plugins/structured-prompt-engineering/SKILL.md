@@ -1,64 +1,66 @@
 ---
 name: structured-prompt-engineering
-description: Use SEMPRE que for escrever, revisar ou refatorar um system prompt e/ou user prompt para uma chamada de LLM — não importa o framework (LangChain, Vercel AI SDK, chamada direta a OpenAI/OpenRouter/Anthropic). Dispare em pedidos como "cria o prompt para...", "como estruturar esse system prompt", "meu prompt não está extraindo direito", "separa o system do user prompt", "monta um few-shot pra esse caso", ou sempre que estiver escrevendo uma função `getSystemPrompt`/`getUserPromptTemplate`. Ensina o padrão de prompt como objeto estruturado serializado via `JSON.stringify` (role, regras, extraction_instructions, examples), como parametrizar essas funções com o que precisa ser injetado, e reforça fortemente exemplos de bom uso vs. erros comuns (do's and don'ts) — derivado de prompts reais em produção.
+description: Use ALWAYS when writing, reviewing, or refactoring a system prompt and/or user prompt for an LLM call — no matter the framework (LangChain, Vercel AI SDK, a direct call to OpenAI/OpenRouter/Anthropic). Fire it on requests like "cria o prompt para...", "como estruturar esse system prompt", "meu prompt não está extraindo direito", "separa o system do user prompt", "monta um few-shot pra esse caso", "write the prompt for...", "how do I structure this system prompt", "my prompt isn't extracting correctly", "split the system from the user prompt", or whenever you are writing a `getSystemPrompt`/`getUserPromptTemplate` function. Teaches the pattern of a prompt as a structured object serialized via `JSON.stringify` (role, rules, extraction_instructions, examples), how to parameterize those functions with whatever must be injected, and strongly reinforces good usage vs. common mistakes (do's and don'ts) — derived from real production prompts.
 ---
 
-# Prompt estruturado: `getSystemPrompt` + `getUserPromptTemplate`
+# Structured prompt: `getSystemPrompt` + `getUserPromptTemplate`
 
-Este é o padrão para escrever prompts de LLM como **funções que retornam um objeto serializado**, em vez de strings de texto corrido. Funciona com qualquer stack que aceite um `system` e um `user`/`human` message — a técnica em si não depende de framework.
+This is the pattern for writing LLM prompts as **functions that return a serialized object**, instead of free-flowing text strings. It works with any stack that accepts a `system` and a `user`/`human` message — the technique itself is framework-independent.
 
-## Por que objeto serializado em vez de texto corrido
+## Why a serialized object instead of prose
 
-Um prompt escrito como parágrafo de texto é difícil de revisar em partes, difícil de saber o que mudou entre versões, e tende a virar um bloco gigante e frágil. Serializando um objeto (`JSON.stringify({...})`) você ganha:
+A prompt written as a paragraph of text is hard to review in parts, hard to diff between versions, and tends to grow into a giant, brittle block. By serializing an object (`JSON.stringify({...})`) you get:
 
-- **Seções nomeadas e revisáveis independentemente** (`role`, `regras`, `examples` são blocos separados, não um parágrafo emaranhado).
-- **Facilidade de gerar o conteúdo dinamicamente** — é só montar um objeto JS/TS normal, sem concatenação de strings.
-- **Um formato que o próprio modelo já é bom em parsear** — LLMs foram muito treinados em JSON, então a estrutura ajuda o modelo a "achar" a regra certa em vez de perder informação num texto corrido longo.
+- **Named sections, reviewable independently** (`role`, `rules`, `examples` are separate blocks, not one tangled paragraph).
+- **Easy dynamic generation** — you just build a normal JS/TS object, with no string concatenation.
+- **A format the model is already good at parsing** — LLMs have been trained heavily on JSON, so the structure helps the model "find" the right rule instead of losing information in a long stretch of prose.
 
-## Anatomia de `getSystemPrompt`
+## Anatomy of `getSystemPrompt`
 
-`getSystemPrompt` é uma função que recebe **apenas o que muda por sessão/config** — nunca a mensagem do turno atual do usuário (isso é sempre responsabilidade do `getUserPromptTemplate`). Os parâmetros são o que precisa ser **injetado**: dados de referência (lista de profissionais, catálogo de produtos), contexto já conhecido do usuário (preferências salvas), etc.
+`getSystemPrompt` is a function that receives **only what changes per session/config** — never the current turn's user message (that is always `getUserPromptTemplate`'s job). The parameters are whatever must be **injected**: reference data (list of professionals, product catalog), context already known about the user (saved preferences), and so on.
 
 ```ts
 export const getSystemPrompt = (userContext?: string) => {
   return JSON.stringify({
-    role: 'Assistente musical entusiasta e amigável - caloroso, animado, conversacional (2-4 frases)',
+    role: 'Enthusiastic, friendly music assistant - warm, upbeat, conversational (2-4 sentences)',
 
-    tarefas: [
-      'Conversar sobre preferências musicais e fazer recomendações personalizadas',
-      'Extrair informações do usuário (nome, idade, gêneros, bandas, humor, contexto)',
-      'SEMPRE recomendar músicas específicas (título e artista) baseado no que sabe do usuário',
+    tasks: [
+      'Chat about music preferences and make personalized recommendations',
+      'Extract information about the user (name, age, genres, bands, mood, context)',
+      'ALWAYS recommend specific songs (title and artist) based on what you know about the user',
     ],
 
-    // Dado injetado, nunca hardcoded dentro do objeto.
-    preferencias_previamente_armazenadas: userContext || 'Nenhuma',
+    // Injected data, never hardcoded inside the object.
+    previously_stored_preferences: userContext || 'None',
 
-    regras_de_extracao: {
-      shouldSavePreferences: 'Defina como true APENAS quando o USUÁRIO compartilhar NOVAS informações pessoais',
-      nunca_extrair: 'Músicas, bandas ou artistas que VOCÊ (IA) recomendou - apenas o que o USUÁRIO disse gostar',
+    extraction_rules: {
+      shouldSavePreferences: 'Set to true ONLY when the USER shares NEW personal information',
+      never_extract: 'Songs, bands, or artists that YOU (the AI) recommended - only what the USER said they like',
     },
 
-    exemplos: [
-      /* ver seção "Exemplos" abaixo */
+    examples: [
+      /* see the "Examples" section below */
     ],
   });
 };
 ```
 
-Seções recorrentes que funcionam bem (nomeie em PT-BR ou EN, mas seja consistente no projeto):
+Recurring sections that work well:
 
-| Seção | Para que serve |
+| Section | What it is for |
 |---|---|
-| `role` | Define o papel/persona e o tom — 1 frase, direto. |
-| `tarefas` / `task` | Lista do que o modelo precisa fazer nesta chamada, não o que ele é. |
-| `regras` / `rules` | Como decidir entre casos (ex.: qual intenção escolher, quando extrair algo). |
-| `extraction_instructions` | Uma instrução por campo do schema de saída — nunca deixe implícito. |
-| `examples` / `exemplos` | Few-shot — ver seção dedicada abaixo. |
-| *(dado dinâmico)* | Qualquer contexto injetado (histórico resumido, lista de referência) vai como uma chave própria, nunca embutido dentro de `role` ou `regras`. |
+| `role` | Defines the persona and the tone — 1 sentence, direct. |
+| `tasks` | List of what the model must do in this call, not what it is. |
+| `rules` | How to decide between cases (e.g. which intent to pick, when to extract something). |
+| `extraction_instructions` | One instruction per field of the output schema — never leave it implicit. |
+| `examples` | Few-shot — see the dedicated section below. |
+| *(dynamic data)* | Any injected context (summarized history, reference list) goes in as its own key, never buried inside `role` or `rules`. |
 
-## Anatomia de `getUserPromptTemplate`
+Keep the key names consistent across the project. If the assistant must answer in a language other than English, that is an **instruction inside the prompt** (`'Reply in Brazilian Portuguese'`), not a reason to rename the sections.
 
-Recebe a **entrada do turno atual** como parâmetro (nunca hardcoded) e, se necessário, contexto adicional específico daquela chamada (histórico da conversa, dados já coletados). Sempre inclui um array de `instrucoes`/`instructions` explícito — mesmo que pareça redundante com o system prompt, repetir a instrução no user prompt (com foco no que fazer *com essa entrada específica*) reduz drift em conversas longas.
+## Anatomy of `getUserPromptTemplate`
+
+It receives the **current turn's input** as a parameter (never hardcoded) and, if needed, additional context specific to that call (conversation history, data already collected). It always includes an explicit `instructions` array — even when that looks redundant with the system prompt, repeating the instruction in the user prompt (focused on what to do *with this specific input*) reduces drift in long conversations.
 
 ```ts
 export const getUserPromptTemplate = (
@@ -66,83 +68,83 @@ export const getUserPromptTemplate = (
   conversationHistory?: string
 ) => {
   return JSON.stringify({
-    contexto_da_conversa: conversationHistory || 'Primeira mensagem',
-    mensagem_atual_do_usuario: userMessage,
-    instrucoes: [
-      'Gere uma resposta calorosa e envolvente em Português',
-      'SEMPRE inclua recomendações de músicas específicas quando relevante',
-      'Extraia quaisquer preferências compartilhadas',
-      'Defina o flag shouldSavePreferences apropriadamente',
+    conversation_context: conversationHistory || 'First message',
+    current_user_message: userMessage,
+    instructions: [
+      'Generate a warm, engaging reply',
+      'ALWAYS include specific song recommendations when relevant',
+      'Extract any preferences the user shared',
+      'Set the shouldSavePreferences flag appropriately',
     ],
   });
 };
 ```
 
-## Parametrização: o que injetar vs. o que hardcodar
+## Parameterization: what to inject vs. what to hardcode
 
-Regra prática: se o valor pode mudar entre chamadas (por ambiente, por usuário, por turno), ele é **parâmetro da função**, nunca um literal dentro do objeto retornado.
+Rule of thumb: if the value can change between calls (per environment, per user, per turn), it is a **function parameter**, never a literal inside the returned object.
 
-- Lista de profissionais/produtos/catálogo → parâmetro de `getSystemPrompt`.
-- Contexto/preferências já conhecidas do usuário → parâmetro de `getSystemPrompt`.
-- Mensagem do usuário no turno atual → parâmetro de `getUserPromptTemplate`, nunca de `getSystemPrompt`.
-- Data/hora atual, se o prompt precisa dela para interpretar "amanhã", "hoje" → gere dentro da função (`new Date().toISOString()`) para não depender de quem chama lembrar de passar.
-- Instruções fixas de tom/formato que nunca mudam → podem ficar hardcoded no objeto, não precisam ser parâmetro.
+- List of professionals/products/catalog → parameter of `getSystemPrompt`.
+- Context/preferences already known about the user → parameter of `getSystemPrompt`.
+- The user's message in the current turn → parameter of `getUserPromptTemplate`, never of `getSystemPrompt`.
+- Current date/time, when the prompt needs it to interpret "tomorrow", "today" → generate it inside the function (`new Date().toISOString()`) so it does not depend on the caller remembering to pass it.
+- Fixed tone/format instructions that never change → can stay hardcoded in the object, no need for a parameter.
 
-## O schema de saída acompanha o prompt, no mesmo arquivo
+## The output schema travels with the prompt, in the same file
 
-Cada módulo de prompt exporta, junto das duas funções, o schema (Zod ou equivalente) que descreve a saída esperada — com `.describe()` em cada campo funcionando como a instrução de extração daquele campo:
+Each prompt module exports, alongside the two functions, the schema (Zod or equivalent) describing the expected output — with a `.describe()` on each field acting as that field's extraction instruction:
 
 ```ts
 export const ChatResponseSchema = z.object({
-  message: z.string().describe('A resposta conversacional para o usuário'),
-  preferences: UserPreferencesSchema.optional().describe('Preferências extraídas desta mensagem'),
-  shouldSavePreferences: z.boolean().describe('Se as preferências extraídas devem ser salvas'),
+  message: z.string().describe('The conversational reply to the user'),
+  preferences: UserPreferencesSchema.optional().describe('Preferences extracted from this message'),
+  shouldSavePreferences: z.boolean().describe('Whether the extracted preferences should be saved'),
 });
 ```
 
-## Exemplos (few-shot) dentro do prompt
+## Examples (few-shot) inside the prompt
 
-O array `examples`/`exemplos` é a parte que mais afeta a qualidade da extração. Um bom conjunto de exemplos cobre: o caso feliz, o caso ambíguo/vazio, e pelo menos um contra-exemplo anotado. Veja `references/examples.md` para 4 exemplos completos e comentados, extraídos de prompts reais (classificação de intenção, geração de mensagem, extração de preferências, sumarização).
+The `examples` array is the part that most affects extraction quality. A good set of examples covers: the happy path, the ambiguous/empty case, and at least one annotated counter-example. See `references/examples.md` for 4 complete, commented examples taken from real prompts (intent classification, message generation, preference extraction, summarization).
 
-Estrutura mínima de um bom exemplo:
+Minimum structure of a good example:
 
 ```ts
 {
-  usuario: 'Gosto especialmente de Tame Impala e Daft Punk',
-  resposta: {
-    message: 'Excelente gosto! Tente "Let It Happen" e "Digital Love"!',
+  user: 'I especially like Tame Impala and Daft Punk',
+  response: {
+    message: 'Great taste! Try "Let It Happen" and "Digital Love"!',
     preferences: { favoriteBands: ['Tame Impala', 'Daft Punk'] },
     shouldSavePreferences: true,
   },
-  nota_importante: 'EXTRAIR — o usuário declarou explicitamente que GOSTA dessas bandas (não foram recomendações da IA)',
+  important_note: 'EXTRACT — the user explicitly stated they LIKE these bands (they were not AI recommendations)',
 }
 ```
 
-O campo `nota_importante` (ou `note`) não é decoração — é o que transmite o *porquê* daquela decisão de extração, o que ajuda o modelo a generalizar para casos parecidos que não estão nos exemplos.
+The `important_note` (or `note`) field is not decoration — it is what conveys the *why* behind that extraction decision, which helps the model generalize to similar cases that are not in the examples.
 
 ## Do's and Don'ts
 
-### ✅ Faça
+### ✅ Do
 
-- **Defina o schema de saída antes de escrever o texto do prompt.** O prompt existe para preencher o schema — comece pelo contrato.
-- **Descreva todo campo do schema com `.describe()`**, mesmo os óbvios. A descrição é lida como instrução de extração.
-- **Separe rigorosamente o que é `system` (config/sessão) do que é `user` (turno atual).** A mensagem do usuário nunca entra em `getSystemPrompt`.
-- **Inclua pelo menos um contra-exemplo anotado** sempre que houver risco de o modelo confundir "o que o usuário disse" com "o que a IA gerou/recomendou" — esse é o erro de extração mais comum e mais silencioso.
-- **Retorne flags determinísticas** (`shouldSavePreferences`, `intent`, `actionSuccess`) em vez de forçar quem consome a resposta a reinterpretar texto livre.
-- **Injete todo dado que varia** (listas de referência, contexto do usuário, data atual) como parâmetro da função — nunca hardcode.
-- **Um arquivo de prompt = uma responsabilidade.** `identifyIntent.ts`, `messageGenerator.ts`, `summarization.ts` são arquivos separados, não um mega-prompt fazendo tudo.
-- **Repita a instrução relevante no `user prompt`**, mesmo que já esteja no system — em conversas longas isso reduz esquecimento/drift do modelo.
+- **Define the output schema before writing the prompt text.** The prompt exists to fill the schema — start from the contract.
+- **Describe every schema field with `.describe()`**, even the obvious ones. The description is read as an extraction instruction.
+- **Rigorously separate what is `system` (config/session) from what is `user` (current turn).** The user's message never goes into `getSystemPrompt`.
+- **Include at least one annotated counter-example** whenever there is a risk of the model confusing "what the user said" with "what the AI generated/recommended" — that is the most common and most silent extraction error.
+- **Return deterministic flags** (`shouldSavePreferences`, `intent`, `actionSuccess`) instead of forcing the consumer of the response to reinterpret free text.
+- **Inject every value that varies** (reference lists, user context, current date) as a function parameter — never hardcode.
+- **One prompt file = one responsibility.** `identifyIntent.ts`, `messageGenerator.ts`, `summarization.ts` are separate files, not one mega-prompt doing everything.
+- **Repeat the relevant instruction in the `user prompt`**, even when it is already in the system — in long conversations that reduces model forgetting/drift.
 
-### ❌ Não faça
+### ❌ Don't
 
-- **Não escreva o system prompt como parágrafo de texto livre.** Se está difícil revisar "qual frase faz o quê", já devia ser um objeto com seções.
-- **Não coloque a mensagem do turno atual dentro de `getSystemPrompt`.** Isso quebra cache de prompt (quando o provider suporta) e mistura o que é estável com o que muda a cada chamada.
-- **Não deixe um campo `optional()` no schema sem `.describe()`.** Campo opcional sem descrição é extraído de forma inconsistente entre chamadas.
-- **Não assuma que o modelo vai "perceber sozinho" uma ambiguidade óbvia** (ex.: não confundir recomendação da IA com preferência do usuário). Sem contra-exemplo anotado, esse erro se repete.
-- **Não hardcode dados de referência** (listas, catálogos, IDs) direto no texto do objeto — isso trava o prompt a um ambiente/teste específico. Sempre parâmetro.
-- **Não misture duas responsabilidades no mesmo prompt** (ex.: classificar intenção E gerar a mensagem final no mesmo `getSystemPrompt`). Cada preocupação, seu próprio módulo de prompt.
-- **Não edite um prompt em produção destrutivamente.** Se for mudar a estrutura, crie uma nova versão (`v2`) em vez de sobrescrever — permite comparar e reverter.
+- **Don't write the system prompt as a free-text paragraph.** If it is hard to review "which sentence does what", it should already be an object with sections.
+- **Don't put the current turn's message inside `getSystemPrompt`.** That breaks prompt caching (where the provider supports it) and mixes what is stable with what changes on every call.
+- **Don't leave an `optional()` schema field without `.describe()`.** An optional field with no description is extracted inconsistently between calls.
+- **Don't assume the model will "figure out" an obvious ambiguity on its own** (e.g. not confusing an AI recommendation with a user preference). Without an annotated counter-example, that error repeats.
+- **Don't hardcode reference data** (lists, catalogs, IDs) directly in the object's text — that ties the prompt to one environment/test. Always a parameter.
+- **Don't mix two responsibilities in the same prompt** (e.g. classifying intent AND generating the final message in the same `getSystemPrompt`). Each concern gets its own prompt module.
+- **Don't edit a production prompt destructively.** When changing the structure, create a new version (`v2`) instead of overwriting — it lets you compare and roll back.
 
-## Referências
+## References
 
-- `references/examples.md` — 4 exemplos completos e comentados de `getSystemPrompt`/`getUserPromptTemplate` + schema, cobrindo: extração de preferências, classificação de intenção, geração de mensagem de resposta, e sumarização de conversa.
+- `references/examples.md` — 4 complete, commented examples of `getSystemPrompt`/`getUserPromptTemplate` + schema, covering: preference extraction, intent classification, reply message generation, and conversation summarization.

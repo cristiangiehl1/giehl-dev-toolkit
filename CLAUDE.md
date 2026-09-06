@@ -2,87 +2,103 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## O que é este repositório
+## Language: write everything in English
 
-Um **marketplace de plugins do Claude Code** — não é uma aplicação. Não há build, bundler, testes automatizados nem `package.json` na raiz. O "produto" são arquivos Markdown com frontmatter (skills) e scripts auxiliares, consumidos pelo próprio Claude Code.
+**Every file in this repository is written in English — the only exception is `README.md`, which stays in Brazilian Portuguese** (it is the PT-BR half of the README mirror; `README.en-US.md` is the English half).
 
-Consequência prática: mudanças são validadas **instalando o marketplace localmente e disparando a skill**, não rodando uma suíte. Não invente comandos de teste.
+That means English for: `CLAUDE.md`, `SKILL.md` bodies and frontmatter, `references/`, `scripts/` (comments, CLI help and console output), `assets/`, `.claude-plugin/marketplace.json` descriptions, `docs/`, and commit messages.
 
-## Comandos
+If you are an agent working here: **do not write PT-BR prose**, even when the user talks to you in Portuguese, and even when the file you are editing already contains PT-BR — translate it as you go instead of matching it. A PT-BR paragraph added to a skill is a defect, not a style choice.
+
+**The one thing that stays bilingual:** literal trigger phrases quoted inside a `description`. The user types in Portuguese, so a description whose triggers only exist in English stops firing. Write the description in English and quote the trigger phrases in both languages:
+
+```yaml
+description: Use ALWAYS when setting up lint/formatting in a JS/TS project — a new project
+  ("configura o lint", "set up linting", "padroniza a formatação") or migrating an existing
+  one ("migra de ESLint pra Biome", "switch Prettier for Biome")...
+```
+
+## What this repository is
+
+A **Claude Code plugin marketplace** — not an application. There is no build, bundler, automated test suite, or root `package.json`. The "product" is Markdown files with frontmatter (skills) plus helper scripts, consumed by Claude Code itself.
+
+Practical consequence: changes are validated by **installing the marketplace locally and triggering the skill**, not by running a suite. Do not invent test commands.
+
+## Commands
 
 ```bash
-# validar o catálogo antes de commitar (erro de JSON quebra o marketplace inteiro)
+# validate the catalog before committing (a JSON error breaks the whole marketplace)
 node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json','utf8'))"
 
-# validar scripts de skill
-node --check plugins/<nome>/scripts/<arquivo>.mjs
+# validate skill scripts
+node --check plugins/<name>/scripts/<file>.mjs
 
-# instalar/testar localmente (o CLI rejeita `.` e caminhos relativos — use o absoluto)
-claude plugin marketplace add /caminho/absoluto/para/giehl-dev-toolkit
+# install/test locally (the CLI rejects `.` and relative paths — use the absolute one)
+claude plugin marketplace add /absolute/path/to/giehl-dev-toolkit
 claude plugin marketplace list
 
-# recarregar o catálogo depois de editar o marketplace.json
+# reload the catalog after editing marketplace.json
 claude plugin marketplace update giehl-dev-toolkit
 ```
 
-Dentro do Claude Code: `/plugin install <nome>@giehl-dev-toolkit`.
+Inside Claude Code: `/plugin install <name>@giehl-dev-toolkit`.
 
-Instalado por diretório, edições no `SKILL.md` valem na hora; mudanças no `marketplace.json` só depois do `marketplace update`.
+Installed by directory, edits to `SKILL.md` take effect immediately; changes to `marketplace.json` only after `marketplace update`.
 
-Para publicar uma versão: `git tag vX.Y.Z && git push origin vX.Y.Z` (SemVer).
+To publish a version: `git tag vX.Y.Z && git push origin vX.Y.Z` (SemVer).
 
-## Arquitetura
+## Architecture
 
-Há **duas fontes de verdade que precisam ficar em sincronia**, e é o erro mais comum ao mexer aqui:
+There are **two sources of truth that must stay in sync**, and this is the most common mistake when working here:
 
-| Arquivo | Papel |
+| File | Role |
 |---|---|
-| `.claude-plugin/marketplace.json` | catálogo — o que o Claude Code enxerga e instala |
-| `plugins/<nome>/SKILL.md` | frontmatter (`name`, `description`) + implementação |
+| `.claude-plugin/marketplace.json` | catalog — what Claude Code sees and installs |
+| `plugins/<name>/SKILL.md` | frontmatter (`name`, `description`) + implementation |
 
-Uma skill criada em `plugins/` mas **não registrada no `marketplace.json` é invisível** — nada falha, ela simplesmente não existe para o instalador. O campo `name` precisa ser idêntico nos dois lugares, e `source` aponta para `./plugins/<nome>`.
+A skill created under `plugins/` but **not registered in `marketplace.json` is invisible** — nothing fails, it simply does not exist for the installer. The `name` field must be identical in both places, and `source` points to `./plugins/<name>`.
 
-#### O schema da entrada, não só o JSON
+#### The entry schema, not just the JSON
 
-`JSON.parse` passando não garante nada: o Claude Code valida cada entrada contra um schema **na hora do install**, e a falha aparece só ali, como `This plugin's marketplace entry is invalid: ...`. `marketplace add` e `marketplace list` continuam funcionando normalmente com uma entrada quebrada.
+`JSON.parse` passing guarantees nothing: Claude Code validates each entry against a schema **at install time**, and the failure surfaces only there, as `This plugin's marketplace entry is invalid: ...`. `marketplace add` and `marketplace list` keep working normally with a broken entry.
 
-A armadilha já vista na prática: `author` **precisa ser objeto**, nunca string.
+The trap already hit in practice: `author` **must be an object**, never a string.
 
 ```jsonc
 "author": { "name": "Cristian Giehl", "email": "cristian.giehl@gmail.com" }  // ✅
 "author": "Cristian Giehl"                                                   // ❌ expected object, received string
 ```
 
-Ao adicionar um plugin, copie uma entrada existente inteira e troque os valores, em vez de escrever os campos de memória — e valide instalando de verdade, não só com `JSON.parse`.
+When adding a plugin, copy an existing entry wholesale and swap the values instead of writing the fields from memory — and validate by actually installing it, not just with `JSON.parse`.
 
-### Anatomia de uma skill
+### Anatomy of a skill
 
 ```
-plugins/<nome>/
-├── SKILL.md       # obrigatório: frontmatter + corpo
-├── references/    # docs .md lidas sob demanda
-├── scripts/       # executáveis (rodam sem carregar contexto)
-└── assets/        # templates/arquivos usados na saída
+plugins/<name>/
+├── SKILL.md       # required: frontmatter + body
+├── references/    # .md docs read on demand
+├── scripts/       # executables (run without loading context)
+└── assets/        # templates/files used in the output
 ```
 
-O carregamento é em três níveis (*progressive disclosure*), e escrever a skill sem respeitar isso desperdiça contexto:
+Loading happens on three levels (*progressive disclosure*), and writing a skill without respecting that wastes context:
 
-1. `name` + `description` — sempre em contexto, em toda sessão;
-2. corpo do `SKILL.md` — carregado quando a skill dispara (mantenha abaixo de ~500 linhas);
-3. `references/`, `scripts/`, `assets/` — só quando necessários.
+1. `name` + `description` — always in context, in every session;
+2. the `SKILL.md` body — loaded when the skill triggers (keep it under ~500 lines);
+3. `references/`, `scripts/`, `assets/` — only when needed.
 
-Conteúdo extenso ou específico de variante vai para `references/`, apontado a partir do `SKILL.md` com a indicação de *quando* ler. Trabalho mecânico e repetitivo (gerar config, editar `package.json`) vai para `scripts/` — código determinístico erra menos que instruir o modelo a reescrever JSON à mão. Veja `plugins/biome-lint-setup/` como referência dessa divisão.
+Long or variant-specific content goes into `references/`, pointed to from `SKILL.md` with an indication of *when* to read it. Mechanical, repetitive work (generating config, editing `package.json`) goes into `scripts/` — deterministic code makes fewer mistakes than instructing the model to rewrite JSON by hand. See `plugins/biome-lint-setup/` as the reference for this split.
 
-### A `description` é o mecanismo de disparo
+### The `description` is the trigger mechanism
 
-Skills não são invocadas pelo nome, e sim porque o modelo leu a `description` e decidiu que ela se aplica. Por isso as descriptions aqui são longas, deliberadamente insistentes ("Use SEMPRE que...") e cheias de **gatilhos literais** — as frases que o usuário realmente digita. Elas também delimitam o que está fora do escopo, para evitar disparo indevido.
+Skills are not invoked by name — they fire because the model read the `description` and decided it applies. That is why the descriptions here are long, deliberately insistent ("Use ALWAYS when...") and full of **literal triggers** — the phrases the user actually types. They also delimit what is out of scope, to avoid firing at the wrong time.
 
-Ao editar uma description, preserve essas características: encurtá-la para ficar "mais limpa" costuma fazer a skill parar de disparar.
+When editing a description, preserve those characteristics: shortening it to look "cleaner" usually makes the skill stop triggering. And keep the PT-BR trigger phrases alongside the English ones (see the language section above) — the user prompts in Portuguese.
 
-## Convenções
+## Conventions
 
-- **Idioma:** skills, descriptions e documentação em **PT-BR**. A exceção é `README.en-US.md`.
-- **`README.md` e `README.en-US.md` são espelhos** — ao alterar um, atualize o outro na mesma mudança.
-- Nomes de plugin em `kebab-case`; versão em SemVer no `marketplace.json`.
-- Mensagens de commit seguem Conventional Commits em PT-BR, com o nome do plugin como escopo: `feat(biome-lint-setup): adiciona ...`.
-- Ao afirmar comportamento de ferramenta externa numa skill, **verifique executando** em vez de deduzir. As armadilhas documentadas em `plugins/biome-lint-setup/` vieram de rodar o Biome de verdade num sandbox; várias contrariam o que a documentação sugere.
+- **Language:** everything in English, except `README.md`. See the language section at the top of this file — it is not negotiable.
+- **`README.md` and `README.en-US.md` are mirrors** — when changing one, update the other in the same change. `README.md` is PT-BR, `README.en-US.md` is English.
+- Plugin names in `kebab-case`; version in SemVer in `marketplace.json`.
+- Commit messages follow Conventional Commits **in English**, with the plugin name as the scope: `feat(biome-lint-setup): add ...`.
+- When asserting external tool behavior inside a skill, **verify by running it** instead of deducing. The traps documented in `plugins/biome-lint-setup/` came from actually running Biome in a sandbox; several contradict what the documentation suggests.

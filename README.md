@@ -23,6 +23,8 @@ O objetivo é ter um único ponto de instalação para tudo que uso com frequên
 | [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Padrão para escrever `getSystemPrompt`/`getUserPromptTemplate` como objetos serializados via `JSON.stringify`, com parametrização, schema de saída e few-shot. |
 | [`biome-lint-setup`](./plugins/biome-lint-setup) | Setup de lint/formatação com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + Tailwind, incluindo `.editorconfig` e `.nvmrc`. Cobre Next.js, Vite/SPA e backend Node (Hono, Fastify, Express, NestJS). |
 
+> As skills são escritas em inglês. Este `README.md` é o único arquivo do repositório em PT-BR.
+
 ## Estrutura do repositório
 
 ```
@@ -92,7 +94,8 @@ O passo 3 não é opcional: um plugin que existe em `plugins/` mas não está no
 - Versionamento seguindo [Semantic Versioning](https://semver.org/lang/pt-BR/) (`MAJOR.MINOR.PATCH`).
 - Cada plugin deve ter uma descrição objetiva do que resolve e um exemplo de uso.
 - A `description` do frontmatter é o que faz a skill **disparar** — ela é lida a cada sessão e deve conter os gatilhos literais que o usuário digita, além do que está fora do escopo. Descrições curtas demais fazem a skill nunca ser acionada.
-- Skills e documentação em PT-BR; `README.md` e `README.en-US.md` são espelhos e mudam juntos.
+- **Tudo é escrito em inglês** — skills, `references/`, `scripts/`, `CLAUDE.md` e mensagens de commit. A única exceção é este `README.md`, a metade PT-BR do espelho; `README.en-US.md` é a metade em inglês, e os dois mudam juntos.
+- Os gatilhos literais citados dentro de uma `description` continuam **bilíngues** (PT-BR + inglês): a descrição é escrita em inglês, mas as frases que o usuário digita em português precisam estar lá, senão a skill deixa de disparar.
 
 ## Versionamento e releases
 

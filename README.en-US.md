@@ -23,7 +23,7 @@ The goal is to have a single installation point for everything I use frequently 
 | [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Pattern for writing `getSystemPrompt`/`getUserPromptTemplate` as objects serialized via `JSON.stringify`, covering parameterization, output schema, and few-shot examples. |
 | [`biome-lint-setup`](./plugins/biome-lint-setup) | Lint/formatting setup with Biome translated from the ESLint + Prettier + simple-import-sort + Tailwind stack, including `.editorconfig` and `.nvmrc`. Covers Next.js, Vite/SPA, and Node backends (Hono, Fastify, Express, NestJS). |
 
-> Skills are written in Brazilian Portuguese.
+> Everything is written in English. `README.md` is the only Brazilian Portuguese file in the repository.
 
 ## Repository structure
 
@@ -94,7 +94,8 @@ Step 3 is not optional: a plugin that exists under `plugins/` but is missing fro
 - Versioning follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`).
 - Each plugin should have a clear description of what it solves and a usage example.
 - The frontmatter `description` is what makes a skill **trigger** — it stays in context every session and should carry the literal phrases a user types, plus what is out of scope. Descriptions that are too short mean the skill never fires.
-- Skills and documentation in Brazilian Portuguese; `README.md` and `README.en-US.md` are mirrors and change together.
+- **Everything is written in English** — skills, `references/`, `scripts/`, `CLAUDE.md`, and commit messages. The only exception is `README.md`, the Brazilian Portuguese half of the mirror; `README.en-US.md` is the English half, and the two change together.
+- The literal triggers quoted inside a `description` stay **bilingual** (PT-BR + English): the description is written in English, but the phrases the user types in Portuguese must be there, otherwise the skill stops firing.
 
 ## Versioning and releases
 

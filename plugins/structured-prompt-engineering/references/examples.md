@@ -1,66 +1,67 @@
-# Exemplos completos de `getSystemPrompt` + `getUserPromptTemplate`
+# Complete examples of `getSystemPrompt` + `getUserPromptTemplate`
 
-Quatro exemplos reais (generalizados de prompts em produção), cada um com uma anotação do que ele demonstra de bom. Use como referência de estrutura, não copie o domínio (música, consultas médicas) se não for o seu caso — o que importa é o padrão.
+Four real examples (generalized from production prompts), each with a note on what it demonstrates well. Use them as a structural reference; do not copy the domain (music, medical appointments) if it is not yours — what matters is the pattern.
 
 ---
 
-## 1. Extração de preferências em chat (conversa aberta)
+## 1. Preference extraction in a chat (open-ended conversation)
 
-**Demonstra:** regra explícita de "o que nunca extrair", contra-exemplo anotado, flag booleana determinística.
+**Demonstrates:** an explicit "what never to extract" rule, an annotated counter-example, a deterministic boolean flag.
 
 ```ts
 import { z } from 'zod';
 
 export const UserPreferencesSchema = z.object({
-  name: z.string().optional().describe('Nome do usuário'),
-  favoriteGenres: z.array(z.string()).optional().describe('Gêneros musicais favoritos'),
-  favoriteBands: z.array(z.string()).optional().describe('Bandas ou artistas favoritos'),
-  mood: z.string().optional().describe('Humor ou sentimento atual'),
+  name: z.string().optional().describe("The user's name"),
+  favoriteGenres: z.array(z.string()).optional().describe('Favorite music genres'),
+  favoriteBands: z.array(z.string()).optional().describe('Favorite bands or artists'),
+  mood: z.string().optional().describe('Current mood or feeling'),
 });
 
 export const ChatResponseSchema = z.object({
-  message: z.string().describe('A resposta conversacional para o usuário'),
-  preferences: UserPreferencesSchema.optional().describe('Preferências extraídas desta mensagem'),
-  shouldSavePreferences: z.boolean().describe('Se as preferências extraídas devem ser salvas'),
+  message: z.string().describe('The conversational reply to the user'),
+  preferences: UserPreferencesSchema.optional().describe('Preferences extracted from this message'),
+  shouldSavePreferences: z.boolean().describe('Whether the extracted preferences should be saved'),
 });
 
 export const getSystemPrompt = (userContext?: string) => {
   return JSON.stringify({
-    role: 'Assistente musical entusiasta e amigável - caloroso, conversacional (2-4 frases)',
+    role: 'Enthusiastic, friendly music assistant - warm, conversational (2-4 sentences)',
 
-    tarefas: [
-      'Conversar sobre preferências musicais e fazer recomendações personalizadas',
-      'Extrair informações do usuário (nome, gêneros, bandas, humor)',
-      'SEMPRE recomendar músicas específicas baseado no que sabe do usuário',
+    tasks: [
+      'Chat about music preferences and make personalized recommendations',
+      'Extract information about the user (name, genres, bands, mood)',
+      'ALWAYS recommend specific songs based on what you know about the user',
     ],
 
-    preferencias_previamente_armazenadas: userContext || 'Nenhuma',
+    previously_stored_preferences: userContext || 'None',
 
-    regras_de_extracao: {
-      shouldSavePreferences: 'Defina como true APENAS quando o USUÁRIO compartilhar NOVAS informações na mensagem atual',
-      extrair_somente: 'Informações que o USUÁRIO declarou explicitamente',
-      nunca_extrair: 'Músicas, bandas ou artistas que VOCÊ (IA) recomendou - apenas o que o USUÁRIO disse gostar',
+    extraction_rules: {
+      shouldSavePreferences: 'Set to true ONLY when the USER shares NEW information in the current message',
+      extract_only: 'Information the USER explicitly stated',
+      never_extract: 'Songs, bands, or artists that YOU (the AI) recommended - only what the USER said they like',
     },
 
-    exemplos: [
+    examples: [
       {
-        usuario: 'Oi! Meu nome é Alex e eu amo música rock',
-        resposta: {
-          message: 'E aí, Alex! Recomendo "Everlong" do Foo Fighters!',
+        user: "Hi! My name is Alex and I love rock music",
+        response: {
+          message: 'Hey Alex! I recommend "Everlong" by Foo Fighters!',
           preferences: { name: 'Alex', favoriteGenres: ['rock'] },
           shouldSavePreferences: true,
         },
       },
       {
-        // Contra-exemplo: o risco de contaminação entre recomendação da IA e preferência do usuário.
-        usuario: 'Gostei dessas recomendações!',
-        contexto: 'IA acabou de recomendar Foo Fighters e Def Leppard',
-        resposta: {
-          message: 'Que ótimo! Quer mais recomendações de rock ou outro gênero?',
+        // Counter-example: the risk of cross-contamination between an AI
+        // recommendation and an actual user preference.
+        user: 'I liked those recommendations!',
+        context: 'The AI has just recommended Foo Fighters and Def Leppard',
+        response: {
+          message: 'Awesome! Want more rock recommendations, or a different genre?',
           preferences: null,
           shouldSavePreferences: false,
         },
-        nota_importante: 'NÃO extraia "Foo Fighters" ou "Def Leppard" como preferência - foram recomendações da IA, não escolhas do usuário',
+        important_note: 'Do NOT extract "Foo Fighters" or "Def Leppard" as preferences - they were AI recommendations, not the user\'s own picks',
       },
     ],
   });
@@ -68,13 +69,13 @@ export const getSystemPrompt = (userContext?: string) => {
 
 export const getUserPromptTemplate = (userMessage: string, conversationHistory?: string) => {
   return JSON.stringify({
-    contexto_da_conversa: conversationHistory || 'Primeira mensagem',
-    mensagem_atual_do_usuario: userMessage,
-    instrucoes: [
-      'Gere uma resposta calorosa em Português',
-      'SEMPRE inclua recomendações específicas quando relevante',
-      'Extraia quaisquer preferências compartilhadas',
-      'Defina o flag shouldSavePreferences apropriadamente',
+    conversation_context: conversationHistory || 'First message',
+    current_user_message: userMessage,
+    instructions: [
+      'Generate a warm reply',
+      'ALWAYS include specific recommendations when relevant',
+      'Extract any preferences the user shared',
+      'Set the shouldSavePreferences flag appropriately',
     ],
   });
 };
@@ -82,60 +83,60 @@ export const getUserPromptTemplate = (userMessage: string, conversationHistory?:
 
 ---
 
-## 2. Classificação de intenção com dados de referência injetados
+## 2. Intent classification with injected reference data
 
-**Demonstra:** injeção de dado dinâmico (`professionals`) em vez de hardcode, `extraction_instructions` um-por-campo, `current_date` gerado dentro da função, exemplos cobrindo cada valor do enum.
+**Demonstrates:** injecting dynamic data (`professionals`) instead of hardcoding it, one-per-field `extraction_instructions`, `current_date` generated inside the function, examples covering every enum value.
 
 ```ts
 import { z } from 'zod';
 
 export const IntentSchema = z.object({
-  intent: z.enum(['schedule', 'cancel', 'list_professionals', 'unknown']).describe('A intenção do usuário'),
-  professionalId: z.number().optional().describe('ID do profissional mencionado'),
-  datetime: z.string().optional().describe('Data e hora do agendamento em formato ISO'),
-  specialty: z.string().optional().describe('Especialidade médica mencionada, se houver'),
+  intent: z.enum(['schedule', 'cancel', 'list_professionals', 'unknown']).describe("The user's intent"),
+  professionalId: z.number().optional().describe('ID of the professional mentioned'),
+  datetime: z.string().optional().describe('Appointment date and time in ISO format'),
+  specialty: z.string().optional().describe('Medical specialty mentioned, if any'),
 });
 
-// `professionals` é sempre injetado por quem chama — nunca hardcoded aqui dentro.
+// `professionals` is always injected by the caller — never hardcoded in here.
 export const getSystemPrompt = (professionals: { id: number; name: string; specialty: string }[]) => {
   return JSON.stringify({
-    role: 'Classificador de intenção para agendamento de consultas',
-    task: 'Identificar a intenção do usuário e extrair todos os detalhes relevantes',
+    role: 'Intent classifier for medical appointment scheduling',
+    task: "Identify the user's intent and extract all relevant details",
     professionals: professionals.map((p) => ({ id: p.id, name: p.name, specialty: p.specialty })),
     current_date: new Date().toISOString(),
 
     rules: {
       schedule: {
-        description: 'Usuário quer marcar uma nova consulta',
+        description: 'User wants to book a new appointment',
         required_fields: ['professionalId', 'datetime'],
       },
       list_professionals: {
-        description: 'Usuário quer saber quais profissionais estão disponíveis',
+        description: 'User wants to know which professionals are available',
         optional_fields: ['specialty'],
       },
       unknown: {
-        description: 'Qualquer coisa não relacionada a agendar/cancelar/consultar',
+        description: 'Anything unrelated to scheduling/canceling/listing',
       },
     },
 
-    // Uma instrução por campo do schema — nunca deixe implícito como extrair.
+    // One instruction per schema field — never leave the extraction implicit.
     extraction_instructions: {
-      professionalId: 'Combine o nome mencionado com o ID na lista `professionals`. Use fuzzy matching.',
-      datetime: 'Converta datas relativas (hoje, amanhã) para ISO usando `current_date` como referência.',
-      specialty: 'Extraia a especialidade mencionada pelo usuário, se houver.',
+      professionalId: 'Match the mentioned name against the ID in the `professionals` list. Use fuzzy matching.',
+      datetime: 'Convert relative dates (today, tomorrow) to ISO using `current_date` as the reference.',
+      specialty: 'Extract the specialty the user mentioned, if any.',
     },
 
     examples: [
       {
-        input: 'Quero marcar com o Dr. Silva amanhã às 16h',
+        input: 'I want to book with Dr. Silva tomorrow at 4pm',
         output: { intent: 'schedule', professionalId: 1, datetime: '2026-03-02T16:00:00.000Z' },
       },
       {
-        input: 'Quais cardiologistas vocês têm?',
-        output: { intent: 'list_professionals', specialty: 'Cardiologia' },
+        input: 'Which cardiologists do you have?',
+        output: { intent: 'list_professionals', specialty: 'Cardiology' },
       },
       {
-        input: 'Como está o tempo hoje?',
+        input: "What's the weather like today?",
         output: { intent: 'unknown' },
       },
     ],
@@ -146,10 +147,10 @@ export const getUserPromptTemplate = (question: string) => {
   return JSON.stringify({
     question,
     instructions: [
-      'Analise a pergunta para determinar a intenção',
-      'Extraia todos os detalhes relevantes',
-      'Converta datas e horários para formato ISO',
-      'Retorne apenas os campos presentes na pergunta',
+      'Analyze the question to determine the intent',
+      'Extract all relevant details',
+      'Convert dates and times to ISO format',
+      'Return only the fields present in the question',
     ],
   });
 };
@@ -157,28 +158,28 @@ export const getUserPromptTemplate = (question: string) => {
 
 ---
 
-## 3. Geração de mensagem final por cenário (`scenario` + `details`)
+## 3. Final message generation per scenario (`scenario` + `details`)
 
-**Demonstra:** um prompt de "redação" (não extrai nada, só gera texto), guiado por um `scenario` explícito + dicionário de exemplos por cenário, e uma regra anti-alucinação explícita (`hasProfessionals`) para impedir o modelo de inventar ou negar dados que já existem.
+**Demonstrates:** a "writing" prompt (it extracts nothing, it only generates text), guided by an explicit `scenario` plus a per-scenario example dictionary, and an explicit anti-hallucination rule (`hasProfessionals`) that stops the model from inventing or denying data that already exists.
 
 ```ts
 import { z } from 'zod';
 
 export const MessageSchema = z.object({
-  message: z.string().min(10).describe('Mensagem clara e amigável para o usuário'),
+  message: z.string().min(10).describe('Clear, friendly message for the user'),
 });
 
 export const getSystemPrompt = () => {
   return JSON.stringify({
-    role: 'Recepcionista médico(a) simpático(a)',
-    task: 'Gerar mensagens claras, profissionais e empáticas para pacientes',
-    tone: 'Profissional mas caloroso, claro e conciso, empático',
+    role: 'Friendly medical receptionist',
+    task: 'Generate clear, professional, empathetic messages for patients',
+    tone: 'Professional but warm, clear and concise, empathetic',
 
     scenarios: {
-      schedule_success: 'Confirme o agendamento com todos os detalhes',
-      schedule_error: 'Peça desculpas e explique por que o agendamento falhou',
-      list_professionals_success: 'Apresente a lista de profissionais disponíveis (em details.professionals)',
-      unknown: 'Explique educadamente que só pode ajudar com agendamentos',
+      schedule_success: 'Confirm the appointment with all the details',
+      schedule_error: 'Apologize and explain why the booking failed',
+      list_professionals_success: 'Present the list of available professionals (in details.professionals)',
+      unknown: 'Politely explain that you can only help with appointments',
     },
   });
 };
@@ -188,16 +189,16 @@ export const getUserPromptTemplate = (data: { scenario: string; details: any }) 
     scenario: data.scenario,
     details: data.details,
     instructions: [
-      'Gere uma mensagem apropriada para o cenário informado',
-      'Inclua todos os detalhes relevantes do objeto details',
-      // Regra anti-alucinação: força o modelo a respeitar um dado de controle vindo do código,
-      // em vez de "decidir sozinho" se algo foi encontrado ou não.
-      'Se details.hasProfessionals for true, details.professionals NÃO está vazio: você DEVE listar esses profissionais. Nunca diga que nenhum foi encontrado quando hasProfessionals é true',
-      'Se details.hasProfessionals for false, diga claramente que nenhum profissional correspondente foi encontrado',
+      'Generate a message appropriate for the given scenario',
+      'Include every relevant detail from the details object',
+      // Anti-hallucination rule: forces the model to respect a control value coming
+      // from the code, instead of "deciding for itself" whether something was found.
+      'If details.hasProfessionals is true, details.professionals is NOT empty: you MUST list those professionals. Never say none were found when hasProfessionals is true',
+      'If details.hasProfessionals is false, clearly say that no matching professional was found',
     ],
     examples: {
-      schedule_success: 'Sua consulta com o Dr. Silva em 12/03 às 16h foi confirmada. Aguardamos sua visita!',
-      unknown: 'Posso ajudar a agendar ou cancelar consultas, ou listar profissionais disponíveis. Como posso ajudar?',
+      schedule_success: 'Your appointment with Dr. Silva on March 12 at 4pm is confirmed. We look forward to seeing you!',
+      unknown: 'I can help you book or cancel appointments, or list the available professionals. How can I help?',
     },
   });
 };
@@ -205,28 +206,28 @@ export const getUserPromptTemplate = (data: { scenario: string; details: any }) 
 
 ---
 
-## 4. Sumarização incremental (merge com estado anterior)
+## 4. Incremental summarization (merging with previous state)
 
-**Demonstra:** o `user prompt` recebendo um resultado anterior (`sumario_anterior`) como parâmetro explícito para permitir merge incremental, em vez de reprocessar a conversa inteira do zero a cada chamada.
+**Demonstrates:** the `user prompt` receiving a previous result (`previous_summary`) as an explicit parameter to allow incremental merging, instead of reprocessing the whole conversation from scratch on every call.
 
 ```ts
 import { z } from 'zod';
 
 export const SummarySchema = z.object({
-  favoriteGenres: z.array(z.string()).optional().describe('Todos os gêneros mencionados'),
-  keyPreferences: z.string().describe('Sumário conciso de 2-4 frases sobre gostos e contexto'),
+  favoriteGenres: z.array(z.string()).optional().describe('All genres mentioned'),
+  keyPreferences: z.string().describe('Concise 2-4 sentence summary of tastes and context'),
 });
 
 export type ConversationSummary = z.infer<typeof SummarySchema>;
 
 export const getSummarizationSystemPrompt = () => {
   return JSON.stringify({
-    role: 'Sumarizador de conversação para preferências musicais',
-    tarefa: 'Analisar a conversa e extrair preferências musicais estruturadas',
-    regras: [
-      'Combinar informações duplicadas',
-      'Se atualizando sumário anterior, preservar info não discutida na nova conversa',
-      'Incluir apenas informações explicitamente declaradas',
+    role: 'Conversation summarizer for music preferences',
+    task: 'Analyze the conversation and extract structured music preferences',
+    rules: [
+      'Merge duplicate information',
+      'When updating a previous summary, preserve info not discussed in the new conversation',
+      'Include only information explicitly stated',
     ],
   });
 };
@@ -236,11 +237,11 @@ export const getSummarizationUserPrompt = (
   previousSummary?: ConversationSummary,
 ) => {
   return JSON.stringify({
-    conversa: conversationHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
-    sumario_anterior: previousSummary || 'Nenhum',
-    instrucoes: [
-      'Atualizar o sumário com novas informações desta conversa',
-      'Preservar informação existente não discutida nas novas mensagens',
+    conversation: conversationHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
+    previous_summary: previousSummary || 'None',
+    instructions: [
+      'Update the summary with new information from this conversation',
+      'Preserve existing information not discussed in the new messages',
     ],
   });
 };
@@ -248,9 +249,9 @@ export const getSummarizationUserPrompt = (
 
 ---
 
-## O que os quatro exemplos têm em comum
+## What all four examples have in common
 
-- Schema definido antes do prompt, cada campo com `.describe()`.
-- `getSystemPrompt` nunca recebe a mensagem do turno atual — só config/contexto/dados de referência.
-- `getUserPromptTemplate` sempre inclui um array de instruções explícito, mesmo repetindo algo do system.
-- Quando há risco de ambiguidade (exemplo 1) ou de alucinação (exemplo 3), existe uma regra ou exemplo *anotado* tratando especificamente desse risco — não se assume que o modelo vai acertar sozinho.
+- The schema is defined before the prompt, every field with a `.describe()`.
+- `getSystemPrompt` never receives the current turn's message — only config/context/reference data.
+- `getUserPromptTemplate` always includes an explicit instructions array, even when it repeats something from the system prompt.
+- Where there is a risk of ambiguity (example 1) or hallucination (example 3), there is a rule or an *annotated* example dealing specifically with that risk — it is never assumed that the model will get it right on its own.

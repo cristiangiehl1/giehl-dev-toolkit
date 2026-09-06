@@ -8,7 +8,7 @@
     {
       "name": "structured-prompt-engineering",
       "displayName": "Structured Prompt Engineering",
-      "description": "Padrão para escrever getSystemPrompt/getUserPromptTemplate como objetos JSON.stringify — estrutura, parametrização e do's/don'ts",
+      "description": "Pattern for writing getSystemPrompt/getUserPromptTemplate as JSON.stringify objects — structure, parameterization, and do's/don'ts",
       "version": "1.0.0",
       "author": {
         "name": "Cristian Giehl",
@@ -21,7 +21,7 @@
     {
       "name": "biome-lint-setup",
       "displayName": "Biome Lint Setup",
-      "description": "Setup de lint/format com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + tailwindcss, com .editorconfig e .nvmrc — Next.js, Vite, e backend Node (Hono, Fastify, Express, NestJS)",
+      "description": "Lint/format setup with Biome translated from the ESLint + Prettier + simple-import-sort + tailwindcss standard, with .editorconfig and .nvmrc — Next.js, Vite, and Node backends (Hono, Fastify, Express, NestJS)",
       "version": "1.0.1",
       "author": {
         "name": "Cristian Giehl",
