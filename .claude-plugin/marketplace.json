@@ -17,6 +17,16 @@
       "license": "MIT",
       "source": "./plugins/structured-prompt-engineering",
       "keywords": ["llm", "prompt-engineering", "system-prompt", "few-shot"]
+    },
+    {
+      "name": "biome-lint-setup",
+      "displayName": "Biome Lint Setup",
+      "description": "Setup de lint/format com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + tailwindcss, com .editorconfig e .nvmrc — Next.js, Vite, e backend Node (Hono, Fastify, Express, NestJS)",
+      "version": "1.0.0",
+      "author": "Cristian Giehl",
+      "license": "MIT",
+      "source": "./plugins/biome-lint-setup",
+      "keywords": ["biome", "lint", "prettier", "eslint", "formatter", "editorconfig"]
     }
   ]
 }
