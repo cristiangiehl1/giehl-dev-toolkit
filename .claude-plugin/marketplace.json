@@ -30,6 +30,19 @@
       "license": "MIT",
       "source": "./plugins/biome-lint-setup",
       "keywords": ["biome", "lint", "prettier", "eslint", "formatter", "editorconfig"]
+    },
+    {
+      "name": "folder-structure-standard",
+      "displayName": "Folder Structure Standard",
+      "description": "Folder layout and layering (model/service/controller/infra) for Next.js full-stack, Vite/React SPA, Node backends (Hono, Fastify, Express), and pnpm monorepos combining them",
+      "version": "1.0.0",
+      "author": {
+        "name": "Cristian Giehl",
+        "email": "cristian.giehl@gmail.com"
+      },
+      "license": "MIT",
+      "source": "./plugins/folder-structure-standard",
+      "keywords": ["folder-structure", "architecture", "nextjs", "node", "monorepo", "clean-architecture"]
     }
   ]
 }
