@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 260" width="1200" height="260" role="img" aria-labelledby="title desc">
+  <title id="title">Giehl Dev Toolkit</title>
+  <desc id="desc">Personal Claude Code plugin marketplace — skills, patterns, and code structures for everyday development</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="50%" stop-color="#151b3d"/>
+      <stop offset="100%" stop-color="#101a33"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <radialGradient id="glowTR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowBL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="1.4" cy="1.4" r="1.4" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+    <clipPath id="round">
+      <rect width="1200" height="260" rx="22"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#round)">
+    <rect width="1200" height="260" fill="url(#bg)"/>
+    <rect width="1200" height="260" fill="url(#dots)"/>
+    <circle cx="1060" cy="30" r="220" fill="url(#glowTR)"/>
+    <circle cx="100" cy="270" r="220" fill="url(#glowBL)"/>
+
+    <!-- three plugins converging into the toolkit hub -->
+    <path d="M 760 186 Q 950 210 1136 122" fill="none" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 10" opacity="0.7"/>
+    <path d="M 900 76 Q 1020 82 1136 118" fill="none" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 10" opacity="0.7"/>
+    <path d="M 1010 188 Q 1080 158 1136 126" fill="none" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 10" opacity="0.7"/>
+
+    <g transform="translate(760,186) rotate(45)">
+      <rect x="-8" y="-8" width="16" height="16" rx="3" fill="#22d3ee"/>
+    </g>
+    <g transform="translate(900,76) rotate(45)">
+      <rect x="-8" y="-8" width="16" height="16" rx="3" fill="#67e8f9"/>
+    </g>
+    <g transform="translate(1010,188) rotate(45)">
+      <rect x="-8" y="-8" width="16" height="16" rx="3" fill="#a78bfa"/>
+    </g>
+
+    <g transform="translate(1136,122)">
+      <circle r="46" fill="url(#hubGlow)"/>
+      <circle r="28" fill="#0b1120" stroke="url(#accent)" stroke-width="2.5"/>
+      <path d="M -9 -8 L 2 0 L -9 8" fill="none" stroke="url(#accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="6" y="6" width="9" height="3" rx="1.2" fill="#a78bfa"/>
+    </g>
+
+    <!-- terminal badge -->
+    <g transform="translate(120,130)">
+      <circle r="40" fill="none" stroke="#22d3ee" stroke-opacity="0.3" stroke-width="1.5"/>
+      <circle r="26" fill="none" stroke="#22d3ee" stroke-opacity="0.5" stroke-width="1.5" stroke-dasharray="3 6"/>
+      <path d="M -9 -9 L 3 0 L -9 9" fill="none" stroke="url(#accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="8" y="6" width="10" height="3.4" rx="1.4" fill="#67e8f9"/>
+    </g>
+
+    <!-- text -->
+    <g font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+      <text x="222" y="118" font-size="46" font-weight="700" fill="#f8fafc" letter-spacing="-0.5">Giehl Dev Toolkit</text>
+      <text x="224" y="150" font-size="17" fill="#9fb3c8">Claude Code plugin marketplace — skills &amp; structures for everyday dev work</text>
+    </g>
+
+    <!-- plugin badges -->
+    <g font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">
+      <g transform="translate(224,178)">
+        <rect width="86" height="30" rx="15" fill="url(#accent)"/>
+        <text x="43" y="20" fill="#0b1120">prompts</text>
+      </g>
+      <g transform="translate(318,178)">
+        <rect width="64" height="30" rx="15" fill="#1c2a57" stroke="#33417d"/>
+        <text x="32" y="20" fill="#dbe4f5">lint</text>
+      </g>
+      <g transform="translate(390,178)">
+        <rect width="98" height="30" rx="15" fill="#1c2a57" stroke="#33417d"/>
+        <text x="49" y="20" fill="#dbe4f5">structure</text>
+      </g>
+    </g>
+  </g>
+</svg>

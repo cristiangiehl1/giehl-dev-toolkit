@@ -1,5 +1,7 @@
 # Giehl Dev Toolkit
 
+![Giehl Dev Toolkit](./docs/banner.svg)
+
 > Marketplace pessoal de plugins para o [Claude Code](https://code.claude.com), reunindo skills, servidores MCP e outros plugins com padrões, boas práticas e estruturas de código usados no dia a dia de desenvolvimento.
 
 🌐 **Idiomas:** [Português (BR)](./README.md) · [English (US)](./README.en-US.md)
@@ -22,6 +24,7 @@ O objetivo é ter um único ponto de instalação para tudo que uso com frequên
 |---|---|
 | [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Padrão para escrever `getSystemPrompt`/`getUserPromptTemplate` como objetos serializados via `JSON.stringify`, com parametrização, schema de saída e few-shot. |
 | [`biome-lint-setup`](./plugins/biome-lint-setup) | Setup de lint/formatação com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + Tailwind, incluindo `.editorconfig` e `.nvmrc`. Cobre Next.js, Vite/SPA e backend Node (Hono, Fastify, Express, NestJS). |
+| [`folder-structure-standard`](./plugins/folder-structure-standard) | Estrutura de pastas e camadas (model/service/controller/infra) para Next.js full-stack, Vite/React SPA, backend Node (Hono, Fastify, Express) e monorepos pnpm. |
 
 > As skills são escritas em inglês. Este `README.md` é o único arquivo do repositório em PT-BR.
 
@@ -37,7 +40,8 @@ giehl-dev-toolkit/
 │       ├── references/       # Documentação carregada sob demanda
 │       ├── scripts/          # Executáveis auxiliares
 │       └── assets/           # Templates e arquivos usados na saída
-├── CLAUDE.md                 # Guia para o Claude Code trabalhar neste repo
+├── AGENTS.md                 # Guia operacional pra qualquer agente trabalhar neste repo
+├── CLAUDE.md                 # Aponta pra @AGENTS.md (convenção do Claude Code)
 ├── README.md                 # Este arquivo (PT-BR)
 └── README.en-US.md           # Versão em inglês
 ```
