@@ -117,4 +117,4 @@ Distributed under the [MIT](./LICENSE) license, unless stated otherwise within a
 ## Author
 
 **Cristian Giehl**
-📧 cristian.giehl@grupokochsa.com.br
+📧 cristian.giehl@gmail.com
