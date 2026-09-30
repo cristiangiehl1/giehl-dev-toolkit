@@ -25,6 +25,7 @@ O objetivo é ter um único ponto de instalação para tudo que uso com frequên
 | [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Padrão para escrever `getSystemPrompt`/`getUserPromptTemplate` como objetos serializados via `JSON.stringify`, com parametrização, schema de saída e few-shot. |
 | [`biome-lint-setup`](./plugins/biome-lint-setup) | Setup de lint/formatação com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + Tailwind, incluindo `.editorconfig` e `.nvmrc`. Cobre Next.js, Vite/SPA e backend Node (Hono, Fastify, Express, NestJS). |
 | [`folder-structure-standard`](./plugins/folder-structure-standard) | Estrutura de pastas e camadas (model/service/controller/infra) para Next.js full-stack, Vite/React SPA, backend Node (Hono, Fastify, Express) e monorepos pnpm. |
+| [`mcp-server-architecture`](./plugins/mcp-server-architecture) | Estrutura de servidores MCP em TypeScript — layout single-domain vs modular monolith (domain/application/infrastructure), SOLID aplicado ao registro de tools, factory + composition root para evitar prop-drilling, Zod como fonte única de verdade, e publicação privada via Verdaccio. |
 
 > As skills são escritas em inglês. Este `README.md` é o único arquivo do repositório em PT-BR.
 

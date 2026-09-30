@@ -110,5 +110,6 @@ When editing a description, preserve those characteristics: shortening it to loo
 | `structured-prompt-engineering` | `getSystemPrompt`/`getUserPromptTemplate` as `JSON.stringify` objects — structure, parameterization, few-shot |
 | `biome-lint-setup` | Lint/format setup with Biome (Next.js, Vite/SPA, Node backends — Hono/Fastify/Express/NestJS) |
 | `folder-structure-standard` | Folder layout and layering (model/service/controller/infra) for Next.js, Vite/React SPA, Node backends, and pnpm monorepos |
+| `mcp-server-architecture` | TypeScript MCP server structure — single-domain vs modular-monolith layout, SOLID applied to tool registration, factory + composition root, Zod as the single source of truth, and private publishing via Verdaccio |
 
 Keep this table in sync with `README.md`/`README.en-US.md` and `.claude-plugin/marketplace.json` whenever a plugin is added, renamed, or removed.

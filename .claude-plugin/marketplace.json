@@ -43,6 +43,19 @@
       "license": "MIT",
       "source": "./plugins/folder-structure-standard",
       "keywords": ["folder-structure", "architecture", "nextjs", "node", "monorepo", "clean-architecture"]
+    },
+    {
+      "name": "mcp-server-architecture",
+      "displayName": "MCP Server Architecture",
+      "description": "Folder layout and layering for TypeScript MCP servers — single-domain (flat, Anthropic mcp-builder style) vs multi-domain modular monolith (domain/application/infrastructure per module), SOLID applied to tool registration, factory + composition root to avoid prop-drilling, Zod as the single source of truth for input/output schemas, and publishing the server privately via a self-hosted Verdaccio npm registry",
+      "version": "1.1.1",
+      "author": {
+        "name": "Cristian Giehl",
+        "email": "cristian.giehl@gmail.com"
+      },
+      "license": "MIT",
+      "source": "./plugins/mcp-server-architecture",
+      "keywords": ["mcp", "model-context-protocol", "architecture", "ddd", "solid", "zod", "typescript", "verdaccio", "private-registry", "npm-publish"]
     }
   ]
 }
