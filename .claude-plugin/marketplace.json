@@ -21,8 +21,8 @@
     {
       "name": "biome-lint-setup",
       "displayName": "Biome Lint Setup",
-      "description": "Lint/format setup with Biome translated from the ESLint + Prettier + simple-import-sort + tailwindcss standard, with .editorconfig and .nvmrc — Next.js, Vite, and Node backends (Hono, Fastify, Express, NestJS)",
-      "version": "1.0.1",
+      "description": "Lint/format setup with Biome translated from the ESLint + Prettier + simple-import-sort + tailwindcss standard, with .editorconfig and a Node version pin (mise or .nvmrc) — monorepo-aware; Next.js, Vite, and Node backends (Hono, Fastify, Express, NestJS)",
+      "version": "1.1.0",
       "author": {
         "name": "Cristian Giehl",
         "email": "cristian.giehl@gmail.com"

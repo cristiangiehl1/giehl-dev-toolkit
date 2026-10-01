@@ -64,9 +64,23 @@ If you decide to update CI, `biome ci` is the pipeline variant — it does not w
 
 ## VSCode
 
-The script writes `.vscode/settings.json` and `.vscode/extensions.json`. Two cautions:
+The script writes `.vscode/settings.json` and `.vscode/extensions.json` so that **the workspace overrides whatever the user has locally**. VS Code gives workspace settings priority over user settings, and that is what makes the project format with Biome even on a machine with ESLint/Prettier installed. If they stayed active alongside Biome, two formatters would fight on save and the file would oscillate between styles on every write — the #1 problem after migrating.
 
-- **Uninstall or disable the `esbenp.prettier-vscode` and `dbaeumer.vscode-eslint` extensions in the workspace.** If they stay active alongside Biome, two formatters fight on save and the file oscillates between styles on every write. It is the #1 problem after migrating.
+What it sets, and why:
+
+| Setting | Why |
+|---|---|
+| `editor.defaultFormatter: biomejs.biome` plus the same key under **each** of `[typescript]`, `[typescriptreact]`, `[javascript]`, `[javascriptreact]`, `[json]`, `[jsonc]`, `[css]` | a language-specific *user* setting (`"[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" }`) beats a global *workspace* one, so the global key alone is not enough |
+| `editor.codeActionsOnSave`: `source.fixAll.biome` and `source.organizeImports.biome` | lint fixes and import sorting on save (`quickfix.biome` is deliberately not used — Biome's own `noQuickfixBiome` rule flags it) |
+| `eslint.enable: false` and `source.fixAll.eslint: "never"` | stops ESLint from linting and from auto-fixing on save |
+| `prettier.enable: false` | stops the Prettier extension (setting name **not** confirmed against its documentation — the per-language formatter above is what actually prevents Prettier from formatting) |
+| `unwantedRecommendations`: `dbaeumer.vscode-eslint`, `esbenp.prettier-vscode` | VS Code stops suggesting them for this workspace |
+
+Behavior worth knowing:
+
+- **The files are merged, never overwritten.** Keys the project already had (`editor.tabSize`, `files.exclude`, other language blocks) are kept; only the keys above are set. An ESLint extension already in `recommendations` is moved to `unwantedRecommendations`.
+- **A file with comments is left untouched.** VS Code reads these files as JSONC, `JSON.parse` does not, and rewriting would delete the comments. The script prints the exact keys to add by hand instead.
+- **With `--no-remove-legacy` nothing about ESLint/Prettier is disabled** — the project still uses them, and switching them off in the editor would break that workflow. Only the Biome keys are written.
 - The Biome extension (`biomejs.biome`) uses the binary from the project's `node_modules`. If the editor complains it cannot find it, that means the install has not run yet.
 
 ## Preserving `git blame`

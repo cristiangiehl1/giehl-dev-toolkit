@@ -23,7 +23,7 @@ The goal is to have a single installation point for everything I use frequently 
 | Plugin | What it does |
 |---|---|
 | [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Pattern for writing `getSystemPrompt`/`getUserPromptTemplate` as objects serialized via `JSON.stringify`, covering parameterization, output schema, and few-shot examples. |
-| [`biome-lint-setup`](./plugins/biome-lint-setup) | Lint/formatting setup with Biome translated from the ESLint + Prettier + simple-import-sort + Tailwind stack, including `.editorconfig` and `.nvmrc`. Covers Next.js, Vite/SPA, and Node backends (Hono, Fastify, Express, NestJS). |
+| [`biome-lint-setup`](./plugins/biome-lint-setup) | Lint/formatting setup with Biome translated from the ESLint + Prettier + simple-import-sort + Tailwind stack, including `.editorconfig` and the Node version pin (mise or `.nvmrc`), and monorepo-aware. Covers Next.js, Vite/SPA, and Node backends (Hono, Fastify, Express, NestJS). |
 | [`folder-structure-standard`](./plugins/folder-structure-standard) | Folder layout and layering (model/service/controller/infra) for Next.js full-stack, Vite/React SPA, Node backends (Hono, Fastify, Express), and pnpm monorepos. |
 | [`mcp-server-architecture`](./plugins/mcp-server-architecture) | TypeScript MCP server structure — single-domain vs modular monolith layout (domain/application/infrastructure), SOLID applied to tool registration, factory + composition root to avoid prop-drilling, Zod as the single source of truth, and private publishing via Verdaccio. |
 
