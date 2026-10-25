@@ -2,6 +2,14 @@
 
 ![Giehl Dev Toolkit](./docs/banner.svg)
 
+[![License: MIT](https://img.shields.io/github/license/cristiangiehl1/giehl-dev-toolkit)](./LICENSE)
+[![Plugins](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcristiangiehl1%2Fgiehl-dev-toolkit%2Fmain%2F.claude-plugin%2Fmarketplace.json&query=%24.plugins.length&label=plugins&color=blue)](./CATALOG.md)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-plugin_marketplace-D97757)](https://code.claude.com)
+[![Last commit](https://img.shields.io/github/last-commit/cristiangiehl1/giehl-dev-toolkit)](https://github.com/cristiangiehl1/giehl-dev-toolkit/commits/main)
+[![Stars](https://img.shields.io/github/stars/cristiangiehl1/giehl-dev-toolkit?style=flat)](https://github.com/cristiangiehl1/giehl-dev-toolkit/stargazers)
+[![Conventional Commits](https://img.shields.io/badge/Conventional_Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](./CONTRIBUTING.md)
+
 > Personal plugin marketplace for [Claude Code](https://code.claude.com), gathering skills, MCP servers, and other plugins with the patterns, best practices, and code structures used in day-to-day development work.
 
 🌐 **Languages:** [Português (BR)](./README.md) · [English (US)](./README.en-US.md)
