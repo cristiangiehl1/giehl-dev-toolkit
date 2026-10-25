@@ -15,7 +15,7 @@
         "email": "cristian.giehl@gmail.com"
       },
       "license": "MIT",
-      "source": "./plugins/structured-prompt-engineering",
+      "source": "./plugins/ai-engineering/structured-prompt-engineering",
       "keywords": ["llm", "prompt-engineering", "system-prompt", "few-shot"]
     },
     {
@@ -28,7 +28,7 @@
         "email": "cristian.giehl@gmail.com"
       },
       "license": "MIT",
-      "source": "./plugins/biome-lint-setup",
+      "source": "./plugins/code-standards/biome-lint-setup",
       "keywords": ["biome", "lint", "prettier", "eslint", "formatter", "editorconfig"]
     },
     {
@@ -41,7 +41,7 @@
         "email": "cristian.giehl@gmail.com"
       },
       "license": "MIT",
-      "source": "./plugins/folder-structure-standard",
+      "source": "./plugins/code-standards/folder-structure-standard",
       "keywords": ["folder-structure", "architecture", "nextjs", "node", "monorepo", "clean-architecture"]
     },
     {
@@ -54,7 +54,7 @@
         "email": "cristian.giehl@gmail.com"
       },
       "license": "MIT",
-      "source": "./plugins/mcp-server-architecture",
+      "source": "./plugins/ai-engineering/mcp-server-architecture",
       "keywords": ["mcp", "model-context-protocol", "architecture", "ddd", "solid", "zod", "typescript", "verdaccio", "private-registry", "npm-publish"]
     },
     {
@@ -67,7 +67,7 @@
         "email": "cristian.giehl@gmail.com"
       },
       "license": "MIT",
-      "source": "./plugins/requirements-ux-analyst",
+      "source": "./plugins/ux-product/requirements-ux-analyst",
       "keywords": ["subagent", "requirements", "ux", "edge-cases", "ui-states", "frontend", "product-owner", "mermaid", "flowchart"]
     },
     {
@@ -80,7 +80,7 @@
         "email": "cristian.giehl@gmail.com"
       },
       "license": "MIT",
-      "source": "./plugins/system-message-writer",
+      "source": "./plugins/ux-product/system-message-writer",
       "keywords": ["subagent", "ux-writing", "microcopy", "error-messages", "i18n", "json", "style-guide"]
     }
   ]

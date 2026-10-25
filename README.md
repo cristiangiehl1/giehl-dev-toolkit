@@ -22,12 +22,12 @@ O objetivo é ter um único ponto de instalação para tudo que uso com frequên
 
 | Plugin | O que faz |
 |---|---|
-| [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Padrão para escrever `getSystemPrompt`/`getUserPromptTemplate` como objetos serializados via `JSON.stringify`, com parametrização, schema de saída e few-shot. |
-| [`biome-lint-setup`](./plugins/biome-lint-setup) | Setup de lint/formatação com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + Tailwind, incluindo `.editorconfig` e a fixação da versão do Node (mise ou `.nvmrc`), com suporte a monorepo. Cobre Next.js, Vite/SPA e backend Node (Hono, Fastify, Express, NestJS). |
-| [`folder-structure-standard`](./plugins/folder-structure-standard) | Estrutura de pastas e camadas (model/service/controller/infra) para Next.js full-stack, Vite/React SPA, backend Node (Hono, Fastify, Express) e monorepos pnpm. |
-| [`mcp-server-architecture`](./plugins/mcp-server-architecture) | Estrutura de servidores MCP em TypeScript — layout single-domain vs modular monolith (domain/application/infrastructure), SOLID aplicado ao registro de tools, factory + composition root para evitar prop-drilling, Zod como fonte única de verdade, e publicação privada via Verdaccio. |
-| [`requirements-ux-analyst`](./plugins/requirements-ux-analyst) | Subagent que analisa requisitos de negócio brutos e extrai cenários ocultos, caminhos infelizes, edge cases, estados de UI (loading/empty/error), falhas de segurança e regras de negócio conflitantes, desenha o fluxo completo em Mermaid (`graph TD`) e grava cada análise como Markdown versionado em `docs/requirements-analyses/`, preservando o histórico da discussão com o PO. |
-| [`system-message-writer`](./plugins/system-message-writer) | Subagent que escreve e padroniza mensagens de sistema (erros, validações, estados vazios, limites) com tom sem culpa, orientado à solução e com glossário consistente (Transferência, Agendamento, Chave Pix), respondendo em JSON estrito por código de erro. |
+| [`structured-prompt-engineering`](./plugins/ai-engineering/structured-prompt-engineering) | Padrão para escrever `getSystemPrompt`/`getUserPromptTemplate` como objetos serializados via `JSON.stringify`, com parametrização, schema de saída e few-shot. |
+| [`biome-lint-setup`](./plugins/code-standards/biome-lint-setup) | Setup de lint/formatação com Biome traduzido do padrão ESLint + Prettier + simple-import-sort + Tailwind, incluindo `.editorconfig` e a fixação da versão do Node (mise ou `.nvmrc`), com suporte a monorepo. Cobre Next.js, Vite/SPA e backend Node (Hono, Fastify, Express, NestJS). |
+| [`folder-structure-standard`](./plugins/code-standards/folder-structure-standard) | Estrutura de pastas e camadas (model/service/controller/infra) para Next.js full-stack, Vite/React SPA, backend Node (Hono, Fastify, Express) e monorepos pnpm. |
+| [`mcp-server-architecture`](./plugins/ai-engineering/mcp-server-architecture) | Estrutura de servidores MCP em TypeScript — layout single-domain vs modular monolith (domain/application/infrastructure), SOLID aplicado ao registro de tools, factory + composition root para evitar prop-drilling, Zod como fonte única de verdade, e publicação privada via Verdaccio. |
+| [`requirements-ux-analyst`](./plugins/ux-product/requirements-ux-analyst) | Subagent que analisa requisitos de negócio brutos e extrai cenários ocultos, caminhos infelizes, edge cases, estados de UI (loading/empty/error), falhas de segurança e regras de negócio conflitantes, desenha o fluxo completo em Mermaid (`graph TD`) e grava cada análise como Markdown versionado em `docs/requirements-analyses/`, preservando o histórico da discussão com o PO. |
+| [`system-message-writer`](./plugins/ux-product/system-message-writer) | Subagent que escreve e padroniza mensagens de sistema (erros, validações, estados vazios, limites) com tom sem culpa, orientado à solução e com glossário consistente (Transferência, Agendamento, Chave Pix), respondendo em JSON estrito por código de erro. |
 
 > As skills são escritas em inglês. Este `README.md` é o único arquivo do repositório em PT-BR.
 
@@ -38,18 +38,20 @@ giehl-dev-toolkit/
 ├── .claude-plugin/
 │   └── marketplace.json      # Catálogo com todos os plugins registrados
 ├── plugins/
-│   └── <nome-do-plugin>/     # Um diretório por plugin
-│       ├── SKILL.md          # Metadados (frontmatter) + implementação da skill
-│       ├── references/       # Documentação carregada sob demanda
-│       ├── scripts/          # Executáveis auxiliares
-│       └── assets/           # Templates e arquivos usados na saída
+│   └── <dominio>/            # Agrupamento por domínio (code-standards, ai-engineering, ux-product)
+│       └── <nome-do-plugin>/ # Um diretório por plugin
+│           ├── SKILL.md      # Metadados (frontmatter) + implementação da skill
+│           ├── agents/       # Subagents (<nome>.md), quando o plugin é um agente
+│           ├── references/   # Documentação carregada sob demanda
+│           ├── scripts/      # Executáveis auxiliares
+│           └── assets/       # Templates e arquivos usados na saída
 ├── AGENTS.md                 # Guia operacional pra qualquer agente trabalhar neste repo
 ├── CLAUDE.md                 # Aponta pra @AGENTS.md (convenção do Claude Code)
 ├── README.md                 # Este arquivo (PT-BR)
 └── README.en-US.md           # Versão em inglês
 ```
 
-Cada plugin listado em `marketplace.json` aponta para um diretório dentro de `plugins/`, contendo seu manifesto e sua implementação (skill, command, hook ou configuração de MCP).
+Cada plugin listado em `marketplace.json` aponta para um diretório em `plugins/<dominio>/<nome-do-plugin>`, contendo seu manifesto e sua implementação (skill, command, hook ou configuração de MCP).
 
 Apenas o `SKILL.md` é obrigatório. `references/`, `scripts/` e `assets/` existem para o carregamento progressivo: o corpo do `SKILL.md` entra em contexto quando a skill dispara, enquanto os demais só são lidos quando realmente necessários.
 
@@ -88,7 +90,7 @@ Instalar um plugin específico dentro do Claude Code:
 
 ## Adicionando um novo plugin
 
-1. Criar um diretório em `plugins/<nome-do-plugin>/`.
+1. Criar um diretório em `plugins/<dominio>/<nome-do-plugin>/` (reaproveite um domínio existente; crie um novo só quando nenhum couber).
 2. Adicionar o manifesto (`SKILL.md` com frontmatter, ou `plugin.json`) descrevendo nome, descrição e uso.
 3. Registrar o plugin em `.claude-plugin/marketplace.json`, incluindo `name`, `version` e `source`.
 4. Testar localmente com `claude plugin marketplace add` antes de publicar.

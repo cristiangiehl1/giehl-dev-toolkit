@@ -22,12 +22,12 @@ The goal is to have a single installation point for everything I use frequently 
 
 | Plugin | What it does |
 |---|---|
-| [`structured-prompt-engineering`](./plugins/structured-prompt-engineering) | Pattern for writing `getSystemPrompt`/`getUserPromptTemplate` as objects serialized via `JSON.stringify`, covering parameterization, output schema, and few-shot examples. |
-| [`biome-lint-setup`](./plugins/biome-lint-setup) | Lint/formatting setup with Biome translated from the ESLint + Prettier + simple-import-sort + Tailwind stack, including `.editorconfig` and the Node version pin (mise or `.nvmrc`), and monorepo-aware. Covers Next.js, Vite/SPA, and Node backends (Hono, Fastify, Express, NestJS). |
-| [`folder-structure-standard`](./plugins/folder-structure-standard) | Folder layout and layering (model/service/controller/infra) for Next.js full-stack, Vite/React SPA, Node backends (Hono, Fastify, Express), and pnpm monorepos. |
-| [`mcp-server-architecture`](./plugins/mcp-server-architecture) | TypeScript MCP server structure — single-domain vs modular monolith layout (domain/application/infrastructure), SOLID applied to tool registration, factory + composition root to avoid prop-drilling, Zod as the single source of truth, and private publishing via Verdaccio. |
-| [`requirements-ux-analyst`](./plugins/requirements-ux-analyst) | Subagent that analyzes raw business requirements and extracts hidden scenarios, unhappy paths, edge cases, required UI states (loading/empty/error), security flaws, and conflicting business rules, draws the full flow as a Mermaid `graph TD` flowchart, and saves every analysis as versioned Markdown under `docs/requirements-analyses/`, keeping the history of the discussion with the PO. |
-| [`system-message-writer`](./plugins/system-message-writer) | Subagent that writes and standardizes user-facing system messages (errors, validation, empty states, limits) in a blameless, solution-oriented tone with a consistent glossary (Transferência, Agendamento, Chave Pix), answering in strict JSON keyed by error code. |
+| [`structured-prompt-engineering`](./plugins/ai-engineering/structured-prompt-engineering) | Pattern for writing `getSystemPrompt`/`getUserPromptTemplate` as objects serialized via `JSON.stringify`, covering parameterization, output schema, and few-shot examples. |
+| [`biome-lint-setup`](./plugins/code-standards/biome-lint-setup) | Lint/formatting setup with Biome translated from the ESLint + Prettier + simple-import-sort + Tailwind stack, including `.editorconfig` and the Node version pin (mise or `.nvmrc`), and monorepo-aware. Covers Next.js, Vite/SPA, and Node backends (Hono, Fastify, Express, NestJS). |
+| [`folder-structure-standard`](./plugins/code-standards/folder-structure-standard) | Folder layout and layering (model/service/controller/infra) for Next.js full-stack, Vite/React SPA, Node backends (Hono, Fastify, Express), and pnpm monorepos. |
+| [`mcp-server-architecture`](./plugins/ai-engineering/mcp-server-architecture) | TypeScript MCP server structure — single-domain vs modular monolith layout (domain/application/infrastructure), SOLID applied to tool registration, factory + composition root to avoid prop-drilling, Zod as the single source of truth, and private publishing via Verdaccio. |
+| [`requirements-ux-analyst`](./plugins/ux-product/requirements-ux-analyst) | Subagent that analyzes raw business requirements and extracts hidden scenarios, unhappy paths, edge cases, required UI states (loading/empty/error), security flaws, and conflicting business rules, draws the full flow as a Mermaid `graph TD` flowchart, and saves every analysis as versioned Markdown under `docs/requirements-analyses/`, keeping the history of the discussion with the PO. |
+| [`system-message-writer`](./plugins/ux-product/system-message-writer) | Subagent that writes and standardizes user-facing system messages (errors, validation, empty states, limits) in a blameless, solution-oriented tone with a consistent glossary (Transferência, Agendamento, Chave Pix), answering in strict JSON keyed by error code. |
 
 > Everything is written in English. `README.md` is the only Brazilian Portuguese file in the repository.
 
@@ -38,18 +38,20 @@ giehl-dev-toolkit/
 ├── .claude-plugin/
 │   └── marketplace.json      # Catalog listing all registered plugins
 ├── plugins/
-│   └── <plugin-name>/        # One directory per plugin
-│       ├── SKILL.md          # Metadata (frontmatter) + skill implementation
-│       ├── references/       # Documentation loaded on demand
-│       ├── scripts/          # Helper executables
-│       └── assets/           # Templates and files used in the output
+│   └── <domain>/             # Grouped by domain (code-standards, ai-engineering, ux-product)
+│       └── <plugin-name>/    # One directory per plugin
+│           ├── SKILL.md      # Metadata (frontmatter) + skill implementation
+│           ├── agents/       # Subagents (<name>.md), when the plugin is an agent
+│           ├── references/   # Documentation loaded on demand
+│           ├── scripts/      # Helper executables
+│           └── assets/       # Templates and files used in the output
 ├── AGENTS.md                 # Operational guide for any agent working in this repo
 ├── CLAUDE.md                 # Points to @AGENTS.md (Claude Code convention)
 ├── README.md                 # Portuguese (BR) version
 └── README.en-US.md           # This file (English)
 ```
 
-Each plugin listed in `marketplace.json` points to a directory under `plugins/`, containing its manifest and implementation (skill, command, hook, or MCP configuration).
+Each plugin listed in `marketplace.json` points to a directory at `plugins/<domain>/<plugin-name>`, containing its manifest and implementation (skill, command, hook, or MCP configuration).
 
 Only `SKILL.md` is required. `references/`, `scripts/`, and `assets/` exist for progressive disclosure: the `SKILL.md` body enters context when the skill triggers, while the rest is read only when actually needed.
 
@@ -88,7 +90,7 @@ Install a specific plugin inside Claude Code:
 
 ## Adding a new plugin
 
-1. Create a directory under `plugins/<plugin-name>/`.
+1. Create a directory under `plugins/<domain>/<plugin-name>/` (reuse an existing domain; create a new one only when none fits).
 2. Add a manifest (`SKILL.md` with frontmatter, or `plugin.json`) describing name, description, and usage.
 3. Register the plugin in `.claude-plugin/marketplace.json`, including `name`, `version`, and `source`.
 4. Test locally with `claude plugin marketplace add` before publishing.

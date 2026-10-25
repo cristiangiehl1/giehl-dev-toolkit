@@ -31,7 +31,7 @@ Practical consequence: changes are validated by **installing the marketplace loc
 node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json','utf8'))"
 
 # validate skill scripts
-node --check plugins/<name>/scripts/<file>.mjs
+node --check plugins/<domain>/<name>/scripts/<file>.mjs
 
 # install/test locally (the CLI rejects `.` and relative paths — use the absolute one)
 claude plugin marketplace add /absolute/path/to/giehl-dev-toolkit
@@ -54,9 +54,9 @@ There are **two sources of truth that must stay in sync**, and this is the most 
 | File | Role |
 |---|---|
 | `.claude-plugin/marketplace.json` | catalog — what Claude Code sees and installs |
-| `plugins/<name>/SKILL.md` | frontmatter (`name`, `description`) + implementation |
+| `plugins/<domain>/<name>/SKILL.md` | frontmatter (`name`, `description`) + implementation |
 
-A skill created under `plugins/` but **not registered in `marketplace.json` is invisible** — nothing fails, it simply does not exist for the installer. The `name` field must be identical in both places, and `source` points to `./plugins/<name>`.
+A skill created under `plugins/` but **not registered in `marketplace.json` is invisible** — nothing fails, it simply does not exist for the installer. The `name` field must be identical in both places, and `source` points to `./plugins/<domain>/<name>`.
 
 #### The entry schema, not just the JSON
 
@@ -71,10 +71,14 @@ The trap already hit in practice: `author` **must be an object**, never a string
 
 When adding a plugin, copy an existing entry wholesale and swap the values instead of writing the fields from memory — and validate by actually installing it, not just with `JSON.parse`.
 
+### Domains
+
+Plugins are grouped by **domain**, not by type (skill/agent/MCP): `plugins/<domain>/<name>/`. Current domains: `code-standards` (lint, folder structure), `ai-engineering` (prompts, MCP servers), `ux-product` (requirements analysis, UX writing). Reuse an existing domain; create a new one only when none fits. The plugin type is visible inside the plugin (`SKILL.md` or `agents/`). The only path that matters to the installer is `source` in `marketplace.json`; the `agents/`, `skills/`, `commands/` and `hooks/` names *inside* a plugin are Claude Code conventions and must not be renamed.
+
 ### Anatomy of a skill
 
 ```
-plugins/<name>/
+plugins/<domain>/<name>/
 ├── SKILL.md       # required: frontmatter + body
 ├── references/    # .md docs read on demand
 ├── scripts/       # executables (run without loading context)
@@ -87,7 +91,7 @@ Loading happens on three levels (*progressive disclosure*), and writing a skill 
 2. the `SKILL.md` body — loaded when the skill triggers (keep it under ~500 lines);
 3. `references/`, `scripts/`, `assets/` — only when needed.
 
-Long or variant-specific content goes into `references/`, pointed to from `SKILL.md` with an indication of *when* to read it. Mechanical, repetitive work (generating config, editing `package.json`) goes into `scripts/` — deterministic code makes fewer mistakes than instructing the model to rewrite JSON by hand. See `plugins/biome-lint-setup/` as the reference for this split.
+Long or variant-specific content goes into `references/`, pointed to from `SKILL.md` with an indication of *when* to read it. Mechanical, repetitive work (generating config, editing `package.json`) goes into `scripts/` — deterministic code makes fewer mistakes than instructing the model to rewrite JSON by hand. See `plugins/code-standards/biome-lint-setup/` as the reference for this split.
 
 ### The `description` is the trigger mechanism
 
@@ -101,7 +105,7 @@ When editing a description, preserve those characteristics: shortening it to loo
 - **`README.md` and `README.en-US.md` are mirrors** — when changing one, update the other in the same change. `README.md` is PT-BR, `README.en-US.md` is English.
 - Plugin names in `kebab-case`; version in SemVer in `marketplace.json`.
 - Commit messages follow Conventional Commits **in English**, with the plugin name as the scope: `feat(biome-lint-setup): add ...`.
-- When asserting external tool behavior inside a skill, **verify by running it** instead of deducing. The traps documented in `plugins/biome-lint-setup/` came from actually running Biome in a sandbox; several contradict what the documentation suggests.
+- When asserting external tool behavior inside a skill, **verify by running it** instead of deducing. The traps documented in `plugins/code-standards/biome-lint-setup/` came from actually running Biome in a sandbox; several contradict what the documentation suggests.
 
 ## Plugins in this marketplace
 
