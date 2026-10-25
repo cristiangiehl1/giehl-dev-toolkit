@@ -31,6 +31,8 @@ O objetivo é ter um único ponto de instalação para tudo que uso com frequên
 
 > As skills são escritas em inglês. Este `README.md` é o único arquivo do repositório em PT-BR.
 
+> Lista completa, por domínio, em [`CATALOG.md`](./CATALOG.md).
+
 ## Estrutura do repositório
 
 ```
@@ -114,6 +116,10 @@ Alterações relevantes devem ser marcadas com tags Git seguindo SemVer:
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+## Contribuindo
+
+O passo a passo completo (estrutura, registro no catálogo, testes locais e convenção de commits) está em [`CONTRIBUTING.md`](./CONTRIBUTING.md), escrito em inglês.
 
 ## Licença
 

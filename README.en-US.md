@@ -31,6 +31,8 @@ The goal is to have a single installation point for everything I use frequently 
 
 > Everything is written in English. `README.md` is the only Brazilian Portuguese file in the repository.
 
+> Full list, grouped by domain, in [`CATALOG.md`](./CATALOG.md).
+
 ## Repository structure
 
 ```
@@ -114,6 +116,10 @@ Relevant changes should be tagged in Git following SemVer:
 git tag v1.0.0
 git push origin v1.0.0
 ```
+
+## Contributing
+
+The full walkthrough (layout, catalog registration, local testing, and commit conventions) is in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
