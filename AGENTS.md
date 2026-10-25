@@ -101,8 +101,8 @@ When editing a description, preserve those characteristics: shortening it to loo
 
 ## Conventions
 
-- **Language:** everything in English, except `README.md`. See the language section at the top of this file — it is not negotiable.
-- **`README.md` and `README.en-US.md` are mirrors** — when changing one, update the other in the same change. `README.md` is PT-BR, `README.en-US.md` is English.
+- **Language:** everything in English, except `README.md` and `CONTRIBUTING.md`. See the language section at the top of this file — it is not negotiable.
+- **`README.md`/`README.en-US.md` and `CONTRIBUTING.md`/`CONTRIBUTING.en-US.md` are mirrors** — when changing one side, update the other in the same change. The unsuffixed file is PT-BR, the `.en-US.md` one is English.
 - Plugin names in `kebab-case`; version in SemVer in `marketplace.json`.
 - Commit messages follow Conventional Commits **in English**, with the plugin name as the scope: `feat(biome-lint-setup): add ...`.
 - When asserting external tool behavior inside a skill, **verify by running it** instead of deducing. The traps documented in `plugins/code-standards/biome-lint-setup/` came from actually running Biome in a sandbox; several contradict what the documentation suggests.
@@ -118,4 +118,4 @@ When editing a description, preserve those characteristics: shortening it to loo
 | `requirements-ux-analyst` | Subagent (`agents/requirements-ux-analyst.md`) — turns raw requirements into hidden scenarios, UI states, security flaws, and conflicting rules for frontend devs, draws a Mermaid flowchart, and keeps an append-only revision history in `docs/requirements-analyses/` of the project it runs in |
 | `system-message-writer` | Subagent (`agents/system-message-writer.md`) — blameless, glossary-consistent system messages as strict JSON (title ≤40, message ≤140, imperative action label) |
 
-Keep this table in sync with `README.md`/`README.en-US.md` and `.claude-plugin/marketplace.json` whenever a plugin is added, renamed, or removed.
+Keep this table in sync with `README.md`/`README.en-US.md`, `CATALOG.md` and `.claude-plugin/marketplace.json` whenever a plugin is added, renamed, or removed.
