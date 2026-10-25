@@ -56,6 +56,19 @@
       "license": "MIT",
       "source": "./plugins/mcp-server-architecture",
       "keywords": ["mcp", "model-context-protocol", "architecture", "ddd", "solid", "zod", "typescript", "verdaccio", "private-registry", "npm-publish"]
+    },
+    {
+      "name": "requirements-ux-analyst",
+      "displayName": "Requirements UX Analyst",
+      "description": "Read-only subagent that analyzes raw business requirements and extracts hidden scenarios, unhappy paths, edge cases, required UI states (loading/empty/error), security flaws, and conflicting business rules — actionable output for frontend developers",
+      "version": "1.0.0",
+      "author": {
+        "name": "Cristian Giehl",
+        "email": "cristian.giehl@gmail.com"
+      },
+      "license": "MIT",
+      "source": "./plugins/requirements-ux-analyst",
+      "keywords": ["subagent", "requirements", "ux", "edge-cases", "ui-states", "frontend", "product-owner"]
     }
   ]
 }

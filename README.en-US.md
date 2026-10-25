@@ -26,6 +26,7 @@ The goal is to have a single installation point for everything I use frequently 
 | [`biome-lint-setup`](./plugins/biome-lint-setup) | Lint/formatting setup with Biome translated from the ESLint + Prettier + simple-import-sort + Tailwind stack, including `.editorconfig` and the Node version pin (mise or `.nvmrc`), and monorepo-aware. Covers Next.js, Vite/SPA, and Node backends (Hono, Fastify, Express, NestJS). |
 | [`folder-structure-standard`](./plugins/folder-structure-standard) | Folder layout and layering (model/service/controller/infra) for Next.js full-stack, Vite/React SPA, Node backends (Hono, Fastify, Express), and pnpm monorepos. |
 | [`mcp-server-architecture`](./plugins/mcp-server-architecture) | TypeScript MCP server structure — single-domain vs modular monolith layout (domain/application/infrastructure), SOLID applied to tool registration, factory + composition root to avoid prop-drilling, Zod as the single source of truth, and private publishing via Verdaccio. |
+| [`requirements-ux-analyst`](./plugins/requirements-ux-analyst) | Read-only subagent that analyzes raw business requirements and extracts hidden scenarios, unhappy paths, edge cases, required UI states (loading/empty/error), security flaws, and conflicting business rules, in a format actionable for frontend developers. |
 
 > Everything is written in English. `README.md` is the only Brazilian Portuguese file in the repository.
 
