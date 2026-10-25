@@ -127,7 +127,7 @@ git push origin v1.0.0
 
 ## Contribuindo
 
-O passo a passo completo (estrutura, registro no catálogo, testes locais e convenção de commits) está em [`CONTRIBUTING.md`](./CONTRIBUTING.md), escrito em inglês.
+O passo a passo completo (estrutura, registro no catálogo, testes locais e convenção de commits) está em [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Licença
 

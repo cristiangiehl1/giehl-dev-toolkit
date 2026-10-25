@@ -4,7 +4,7 @@ This file provides guidance to any coding agent (Claude Code, Codex, or otherwis
 
 ## Language: write everything in English
 
-**Every file in this repository is written in English — the only exception is `README.md`, which stays in Brazilian Portuguese** (it is the PT-BR half of the README mirror; `README.en-US.md` is the English half).
+**Every file in this repository is written in English — the only exceptions are `README.md` and `CONTRIBUTING.md`, which stay in Brazilian Portuguese** (each is the PT-BR half of a mirror; `README.en-US.md` and `CONTRIBUTING.en-US.md` are the English halves, and each pair changes together).
 
 That means English for: `AGENTS.md`, `SKILL.md` bodies and frontmatter, `references/`, `scripts/` (comments, CLI help and console output), `assets/`, `.claude-plugin/marketplace.json` descriptions, `docs/`, and commit messages.
 

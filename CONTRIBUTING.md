@@ -1,56 +1,58 @@
-# Contributing
+# Contribuindo
 
-Thanks for your interest in improving `giehl-dev-toolkit`. This repository is a **Claude Code plugin marketplace**, not an application: there is no build or automated test suite. The "product" is Markdown files with frontmatter (skills and subagents) plus a few helper scripts.
+🌐 **Idiomas:** [Português (BR)](./CONTRIBUTING.md) · [English (US)](./CONTRIBUTING.en-US.md)
 
-`AGENTS.md` is the detailed operational guide (also read by coding agents). This file is the short version for people.
+Obrigado pelo interesse em melhorar o `giehl-dev-toolkit`. Este repositório é um **marketplace de plugins do Claude Code**, não uma aplicação: não há build nem suíte de testes automatizados. O "produto" são arquivos Markdown com frontmatter (skills e subagents) e alguns scripts auxiliares.
 
-## Language
+O `AGENTS.md` é o guia operacional detalhado (também lido por agentes de código). Este arquivo é a versão curta para pessoas.
 
-Everything is written in **English**, including commit messages, except `README.md`, which stays in Brazilian Portuguese (it mirrors `README.en-US.md`; the two change together).
+## Idioma
 
-The one exception inside plugins: literal trigger phrases quoted in a `description` stay bilingual (PT-BR + English), because users type in Portuguese and a description without those phrases stops triggering.
+Tudo é escrito em **inglês**, inclusive as mensagens de commit, exceto o `README.md` e o `CONTRIBUTING.md`, que ficam em português do Brasil. Cada um tem um espelho em inglês (`README.en-US.md` e `CONTRIBUTING.en-US.md`), e os dois lados mudam juntos.
 
-## Repository layout
+A única exceção dentro dos plugins: as frases de gatilho literais citadas em uma `description` ficam bilíngues (PT-BR + inglês), porque os usuários digitam em português e uma descrição sem essas frases deixa de disparar.
+
+## Estrutura do repositório
 
 ```
-.claude-plugin/marketplace.json     # catalog: what Claude Code sees and installs
-plugins/<domain>/<plugin-name>/     # one directory per plugin
-├── SKILL.md                        # skill: frontmatter + body
-├── agents/<name>.md                # subagent (instead of SKILL.md)
-├── references/                     # docs read on demand
-├── scripts/                        # helper executables
-└── assets/                         # templates used in the output
+.claude-plugin/marketplace.json     # catálogo: o que o Claude Code enxerga e instala
+plugins/<dominio>/<nome-do-plugin>/ # um diretório por plugin
+├── SKILL.md                        # skill: frontmatter + corpo
+├── agents/<nome>.md                # subagent (no lugar do SKILL.md)
+├── references/                     # documentação lida sob demanda
+├── scripts/                        # executáveis auxiliares
+└── assets/                         # templates usados na saída
 ```
 
-Plugins are grouped by **domain**, not by type. Current domains: `code-standards`, `ai-engineering`, `ux-product`. Reuse one; create a new domain only when none fits.
+Os plugins são agrupados por **domínio**, não por tipo. Domínios atuais: `code-standards`, `ai-engineering`, `ux-product`. Reaproveite um existente e crie um novo só quando nenhum couber.
 
-## Adding a plugin
+## Adicionando um plugin
 
-1. Create `plugins/<domain>/<plugin-name>/` (`kebab-case`) with a `SKILL.md` or an `agents/<name>.md`.
-2. Register it in `.claude-plugin/marketplace.json`. **Copy an existing entry** and swap the values (`author` must be an object). A plugin missing from the catalog is invisible: nothing fails, it just never shows up.
-3. Keep `name` identical in `marketplace.json` and in the frontmatter.
-4. Add a row to the plugin table in `README.md`, `README.en-US.md` and `AGENTS.md`.
-5. Write a `description` that carries the literal phrases a user would type and says what is out of scope. Short descriptions mean the plugin never fires.
+1. Crie `plugins/<dominio>/<nome-do-plugin>/` (em `kebab-case`) com um `SKILL.md` ou um `agents/<nome>.md`.
+2. Registre-o no `.claude-plugin/marketplace.json`. **Copie uma entrada existente** e troque os valores (`author` precisa ser um objeto). Um plugin fora do catálogo fica invisível: nada falha, ele só nunca aparece.
+3. Mantenha o `name` idêntico no `marketplace.json` e no frontmatter.
+4. Adicione uma linha na tabela de plugins do `README.md`, do `README.en-US.md` e do `AGENTS.md`, e uma entrada no `CATALOG.md`.
+5. Escreva uma `description` com as frases literais que o usuário digitaria e que diga o que está fora do escopo. Descrições curtas fazem o plugin nunca disparar.
 
-## Testing your change
+## Testando sua mudança
 
-Validate the catalog and install it locally (the CLI needs an absolute path):
+Valide o catálogo e instale localmente (a CLI exige caminho absoluto):
 
 ```bash
 node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json','utf8'))"
 claude plugin validate .
-claude plugin marketplace add /absolute/path/to/giehl-dev-toolkit
+claude plugin marketplace add /caminho/absoluto/para/giehl-dev-toolkit
 claude plugin marketplace update giehl-dev-toolkit
-claude plugin install <plugin-name>@giehl-dev-toolkit
+claude plugin install <nome-do-plugin>@giehl-dev-toolkit
 ```
 
-`JSON.parse` passing is not enough: entries are schema-validated at install time. Then trigger the plugin in a real session. For scripts, also run `node --check plugins/<domain>/<name>/scripts/<file>.mjs`.
+Passar no `JSON.parse` não basta: as entradas são validadas por schema na instalação. Depois, dispare o plugin numa sessão real. Para scripts, rode também `node --check plugins/<dominio>/<nome>/scripts/<arquivo>.mjs`.
 
-When a skill claims how an external tool behaves, verify it by running the tool instead of deducing it.
+Quando uma skill afirma como uma ferramenta externa se comporta, verifique rodando a ferramenta em vez de deduzir.
 
-## Commits and pull requests
+## Commits e pull requests
 
-- [Conventional Commits](https://www.conventionalcommits.org/) in English, with the plugin as scope: `feat(system-message-writer): add ...`, `fix(biome-lint-setup): ...`.
-- Use `refactor:` or `docs:` without a scope for repository-wide changes.
-- Versions follow [SemVer](https://semver.org/). Bump `version` in `marketplace.json` when a plugin changes behavior; releases are tags (`git tag vX.Y.Z && git push origin vX.Y.Z`).
-- Keep one logical change per pull request and describe how you tested it.
+- [Conventional Commits](https://www.conventionalcommits.org/) em inglês, com o plugin como escopo: `feat(system-message-writer): add ...`, `fix(biome-lint-setup): ...`.
+- Use `refactor:` ou `docs:` sem escopo para mudanças que afetam o repositório inteiro.
+- As versões seguem [SemVer](https://semver.org/). Aumente a `version` no `marketplace.json` quando um plugin mudar de comportamento; releases são tags (`git tag vX.Y.Z && git push origin vX.Y.Z`).
+- Mantenha uma mudança lógica por pull request e descreva como você testou.

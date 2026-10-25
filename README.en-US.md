@@ -127,7 +127,7 @@ git push origin v1.0.0
 
 ## Contributing
 
-The full walkthrough (layout, catalog registration, local testing, and commit conventions) is in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+The full walkthrough (layout, catalog registration, local testing, and commit conventions) is in [`CONTRIBUTING.en-US.md`](./CONTRIBUTING.en-US.md).
 
 ## License
 
