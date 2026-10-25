@@ -27,6 +27,7 @@ The goal is to have a single installation point for everything I use frequently 
 | [`folder-structure-standard`](./plugins/folder-structure-standard) | Folder layout and layering (model/service/controller/infra) for Next.js full-stack, Vite/React SPA, Node backends (Hono, Fastify, Express), and pnpm monorepos. |
 | [`mcp-server-architecture`](./plugins/mcp-server-architecture) | TypeScript MCP server structure — single-domain vs modular monolith layout (domain/application/infrastructure), SOLID applied to tool registration, factory + composition root to avoid prop-drilling, Zod as the single source of truth, and private publishing via Verdaccio. |
 | [`requirements-ux-analyst`](./plugins/requirements-ux-analyst) | Subagent that analyzes raw business requirements and extracts hidden scenarios, unhappy paths, edge cases, required UI states (loading/empty/error), security flaws, and conflicting business rules, draws the full flow as a Mermaid `graph TD` flowchart, and saves every analysis as versioned Markdown under `docs/requirements-analyses/`, keeping the history of the discussion with the PO. |
+| [`system-message-writer`](./plugins/system-message-writer) | Subagent that writes and standardizes user-facing system messages (errors, validation, empty states, limits) in a blameless, solution-oriented tone with a consistent glossary (Transferência, Agendamento, Chave Pix), answering in strict JSON keyed by error code. |
 
 > Everything is written in English. `README.md` is the only Brazilian Portuguese file in the repository.
 

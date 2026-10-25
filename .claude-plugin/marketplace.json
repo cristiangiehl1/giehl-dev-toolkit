@@ -69,6 +69,19 @@
       "license": "MIT",
       "source": "./plugins/requirements-ux-analyst",
       "keywords": ["subagent", "requirements", "ux", "edge-cases", "ui-states", "frontend", "product-owner", "mermaid", "flowchart"]
+    },
+    {
+      "name": "system-message-writer",
+      "displayName": "System Message Writer",
+      "description": "Subagent that writes and standardizes user-facing system messages (errors, validation, empty states, limits) following a blameless, solution-oriented, glossary-consistent style guide, and answers with strict JSON keyed by error code (title max 40, message max 140, imperative action label)",
+      "version": "1.0.0",
+      "author": {
+        "name": "Cristian Giehl",
+        "email": "cristian.giehl@gmail.com"
+      },
+      "license": "MIT",
+      "source": "./plugins/system-message-writer",
+      "keywords": ["subagent", "ux-writing", "microcopy", "error-messages", "i18n", "json", "style-guide"]
     }
   ]
 }

@@ -112,5 +112,6 @@ When editing a description, preserve those characteristics: shortening it to loo
 | `folder-structure-standard` | Folder layout and layering (model/service/controller/infra) for Next.js, Vite/React SPA, Node backends, and pnpm monorepos |
 | `mcp-server-architecture` | TypeScript MCP server structure — single-domain vs modular-monolith layout, SOLID applied to tool registration, factory + composition root, Zod as the single source of truth, and private publishing via Verdaccio |
 | `requirements-ux-analyst` | Subagent (`agents/requirements-ux-analyst.md`) — turns raw requirements into hidden scenarios, UI states, security flaws, and conflicting rules for frontend devs, draws a Mermaid flowchart, and keeps an append-only revision history in `docs/requirements-analyses/` of the project it runs in |
+| `system-message-writer` | Subagent (`agents/system-message-writer.md`) — blameless, glossary-consistent system messages as strict JSON (title ≤40, message ≤140, imperative action label) |
 
 Keep this table in sync with `README.md`/`README.en-US.md` and `.claude-plugin/marketplace.json` whenever a plugin is added, renamed, or removed.
